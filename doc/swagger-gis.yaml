@@ -1,0 +1,222 @@
+swagger: '2.0'
+info:
+  description: >-
+    GIS相关存储、查询等。
+  version: 1.0.0
+  title: GIS中的业务服务
+host: 127.0.0.1:8000
+basePath: /gis/v1
+
+tags:
+  - name: 厂区平面图管理plantLayout
+    description: 厂区平面图的上传、查询、查看等
+
+schemes:
+  - http
+
+paths:
+####厂区平面图####
+ /plantLayouts:
+   post:
+     tags:
+       - 厂区平面图管理plantLayout
+     summary: '新增厂区平面图'
+     operationId: addPlantLayout
+     parameters:
+       - name: plantLayout
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/PlantLayout'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /plantLayouts/{id}:
+   get:
+     tags:
+       - 厂区平面图管理plantLayout
+     summary: '获取单个厂区平面图'
+     operationId: findPlantLayoutById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/PlantLayout'
+   put:
+     tags:
+       - 厂区平面图管理plantLayout
+     summary: '修改厂区平面图'
+     operationId: updatePlantLayout
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: plantLayout
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/PlantLayout'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 厂区平面图管理plantLayout
+     summary: '删除厂区平面图'
+     operationId: deletePlantLayout
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /plantLayouts/search:
+   post:
+     tags:
+       - 厂区平面图管理plantLayout
+     summary: '根据条件查询厂区平面图列表-分页'
+     operationId: findPlantLayouts
+     parameters:
+       - name: plantLayoutVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             gisOrgId:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/PlantLayoutList'
+ /plantLayouts/searchAll:
+   post:
+     tags:
+       - 厂区平面图管理plantLayout
+     summary: '根据查询条件查询专家列表-不分页'
+     operationId: findPlantLayoutsAll
+     parameters:
+       - name: plantLayoutVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             gisOrgId:
+               type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/PlantLayout'
+
+definitions:
+  PlantLayout:
+    type: object
+    properties:
+      id:
+        type: string
+      layoutName:
+        type: string
+      lonAndLat1:
+        type: string
+      lonAndLat2:
+        type: string
+      lonAndLat3:
+        type: string
+      gisOrgId:
+        type: string
+      picUrl:
+        type: string
+      notes:
+        type: string
+  PlantLayoutList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/PlantLayout'
+
+##### common model####
+  SearchBody:
+    type: object
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000 操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+
+#### parameters####
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string
+
+

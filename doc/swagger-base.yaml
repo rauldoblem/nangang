@@ -1,0 +1,1881 @@
+swagger: '2.0'
+info:
+  description: >-
+    通讯录、短信、电话、传真等.
+  version: 1.0.0
+  title: base基础支撑服务
+host: 127.0.0.1:8000
+basePath: /emp-base/v1
+tags:
+  - name: 通讯录管理contact
+    description: 通讯录信息管理
+  - name: 通知公告管理notice
+    description: 通知公告信息管理
+  - name: 短信管理sms
+    description: 短信信息管理
+  - name: 电话录音管理telrecord
+    description: 电话录音信息管理
+  - name: 传真管理fax
+    description: 传真信息管理
+  - name: 个人设置perSetting
+    description: 可设置个人对组织机构的分组信息【2018-12-26新增】
+  - name: 应急响应启动条件设置conditionSetting【2018-12-28新增】
+    description: 针对事件类型，设置不同等级下应急响应的启动条件
+schemes:
+  - http
+paths:
+####通讯录管理####
+  /contacts:
+   post:
+     tags:
+       - 通讯录管理contact
+     summary: '新增通讯录'
+     operationId: addContact
+     parameters:
+        - name: contact
+          in: body
+          required: true
+          schema:
+           $ref: '#/definitions/Contact'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+  /contacts/{id}:
+    put:
+      tags:
+         - 通讯录管理contact
+      summary: '修改通讯录'
+      operationId: updateContact
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: contact
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Contact'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+         - 通讯录管理contact
+      summary: '获取单条通讯录信息'
+      operationId: findContactById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Contact'
+    delete:
+          tags:
+             - 通讯录管理contact
+          summary: '删除单条通讯录信息'
+          operationId: deleteContact
+          parameters:
+            - $ref: '#/parameters/id-p'
+          responses:
+            200:
+              description: ok
+              schema:
+                $ref: '#/definitions/ReturnResult'
+  /contacts/search:
+    post:
+     tags:
+       - 通讯录管理contact
+     summary: '根据条件查询通讯录列表-分页'
+     operationId: findContacts
+     parameters:
+       - name: contactVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             orgId:
+               type: string
+               description: "默认值为组织机构根节点-1，用于查询全部通讯录，"
+             name:
+               type: string
+             telephone:
+               type: string
+             mobileFlag:
+               type: string
+               description: 是否将没有手机号的人员进行过滤标识，0不过滤，1过滤
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ContactList'
+  /contacts/searchAll:
+    post:
+     tags:
+       - 通讯录管理contact
+     summary: '根据条件查询通讯录列表-不分页'
+     operationId: findContactAll
+     parameters:
+       - name: contactVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             orgId:
+               type: string
+             name:
+               type: string
+             telephone:
+               type: string
+             mobileFlag:
+               type: string
+               description: 是否将没有手机号的人员进行过滤标识，0不过滤，1过滤
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Contact'
+  /contacts/add:
+    post:
+     tags:
+       - 通讯录管理contact
+     summary: '添加到组，向个人通讯录分组中添加通讯录信息'
+     operationId: addContactToTeam
+     parameters:
+       - name: addContactToTeamVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             contactIds:
+               type: array
+               items:
+                 type: string
+               description: "通讯录可多选"
+             teamId:
+               type: string
+     responses:
+       200:
+         description: ok
+         schema:
+          $ref: '#/definitions/ReturnResult'
+  /contacts/remove:
+    post:
+     tags:
+       - 通讯录管理contact
+     summary: '移除组，从个人通讯录分组中移除通讯录信息'
+     operationId: removeContactToTeam
+     parameters:
+       - name: removeContactToTeamVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             contactIds:
+               type: array
+               items:
+                 type: string
+             teamId:
+               type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+  /contactteams:
+    post:
+      tags:
+        - 通讯录管理contact
+      summary: '新增通讯录分组'
+      operationId: addContactteam
+      parameters:
+        - name: contactteam
+          in: body
+          required: true
+          schema:
+           $ref: '#/definitions/Contactteam'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /contactteams/{id}:
+    put:
+      tags:
+         - 通讯录管理contact
+      summary: '修改通讯录分组'
+      operationId: updateContactteam
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: contactteam
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Contactteam'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+         - 通讯录管理contact
+      summary: '获取单条通讯录分组信息'
+      operationId: findContactteamById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Contactteam'
+    delete:
+      tags:
+        - 通讯录管理contact
+      summary: '删除单条通讯录分组信息'
+      operationId: deleteContactteam
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /contactteams/searchAll:
+    post:
+     tags:
+       - 通讯录管理contact
+     summary: '根据条件查询通讯录分组列表-不分页'
+     operationId: findContactteamAll
+     parameters:
+       - name: contactteamVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             userId:
+               type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ContactteamList'
+  /contactteams/searchContacts:
+    post:
+     tags:
+       - 通讯录管理contact
+     summary: '我的分组查询通讯录列表-分页'
+     operationId: findContactsByTeamId
+     parameters:
+       - name: contactVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             teamId:
+               type: string
+             name:
+               type: string
+             telephone:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ContactList'
+####通知公告####
+  /notices:
+    post:
+     tags:
+       - 通知公告管理notice
+     summary: '新增通知公告'
+     operationId: addNotice
+     parameters:
+       - name: notice
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/NoticeVo'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+  /notices/{id}:
+    put:
+      tags:
+         - 通知公告管理notice
+      summary: '修改通知公告'
+      operationId: updateNotice
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: notice
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/NoticeVo'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+         - 通知公告管理notice
+      summary: '获取单条通知公告信息'
+      operationId: findnoticeById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Notice'
+    delete:
+          tags:
+             - 通知公告管理notice
+          summary: '删除通知公告信息'
+          operationId: deleteNotice
+          parameters:
+            - $ref: '#/parameters/id-p'
+          responses:
+            200:
+              description: ok
+              schema:
+                $ref: '#/definitions/ReturnResult'
+  /notices/search:
+    post:
+      tags:
+        - 通知公告管理notice
+      summary: '根据条件查询通知公告列表-分页'
+      operationId: findNotices
+      parameters:
+        - name: noticesVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              noticeTypeId:
+                type: string
+              sendStartTime:
+                type: string
+                format: date-time
+              sendEndTime:
+                type: string
+                format: date-time
+              sendStatus:
+                type: string
+              orgId:
+                type: string
+                description: 单位ID，即当前用户所属单位ID
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/NoticeList'
+  /notices/send:
+    post:
+      tags:
+        - 通知公告管理notice
+      summary: '通知公告发送'
+      operationId: sendNotice
+      parameters:
+        - name: sendNoticeVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              orgIds:
+                type: array
+                items:
+                  type: string
+              noticeId:
+                type: string
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /notices/viewFeedbacks/{noticeId}:
+    get:
+      tags:
+        - 通知公告管理notice
+      summary: '通知公告接收状态查看'
+      operationId: viewFeedbackList
+      parameters:
+        - name: noticeId
+          in: path
+          required: true
+          type: string
+          description: 通知公告ID
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/NoticeRecieveOrg'
+  /notices/recSearch:
+    post:
+      tags:
+        - 通知公告管理notice
+      summary: '根据条件查询本单位接收的通知公告列表-分页'
+      operationId: findRecNotices
+      parameters:
+        - name: noticesVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              noticeTypeId:
+                type: string
+              sendStartTime:
+                type: string
+                format: date-time
+              sendEndTime:
+                type: string
+                format: date-time
+              buildOrgIds:
+                type: array
+                description: 通知创建单位
+                items:
+                  type: string
+              revOrgId:
+                type: string
+                description: 接收单位ID，即当前用户所属单位ID
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/NoticeRecList'
+  /notices/viewNoticeRec/{noticeRecId}:
+    get:
+      tags:
+        - 通知公告管理notice
+      summary: '接收的通知公告查看'
+      operationId: viewNoticeRec
+      parameters:
+        - name: noticeRecId
+          in: path
+          required: true
+          type: string
+          description: 通知公告接收ID
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/NoticeRec'
+  /notices/viewFeedback/{noticeRecId}:
+    get:
+      tags:
+        - 通知公告管理notice
+      summary: '查看通知公告反馈'
+      operationId: viewFeedback
+      parameters:
+        - name: noticeRecId
+          in: path
+          required: true
+          type: string
+          description: 通知公告接收ID
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/NoticeFeedback'
+  /notices/feedback:
+    post:
+      tags:
+        - 通知公告管理notice
+      summary: '通知公告反馈，保存同时修改反馈状态'
+      operationId: feedbackNotice
+      parameters:
+        - name: feedbackNotice
+          in: body
+          required: true
+          schema:
+           $ref: '#/definitions/NoticeFeedback'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+####短信管理####
+  /smses:
+    post:
+      tags:
+        - 短信管理sms
+      summary: '新增短信'
+      operationId: addSms
+      parameters:
+        - name: sms
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Sms'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /smses/{id}:
+    put:
+      tags:
+          - 短信管理sms
+      summary: '修改短信'
+      operationId: updateSms
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: sms
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Sms'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+         - 短信管理sms
+      summary: '获取单条短信信息'
+      operationId: findsmsById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Sms'
+    delete:
+          tags:
+             - 短信管理sms
+          summary: '删除单条短信信息'
+          operationId: deleteSms
+          parameters:
+            - $ref: '#/parameters/id-p'
+          responses:
+            200:
+              description: ok
+              schema:
+                $ref: '#/definitions/ReturnResult'
+  /smses/search:
+    post:
+      tags:
+        - 短信管理sms
+      summary: '根据条件查询短信列表-分页'
+      operationId: findSmss
+      parameters:
+        - name: smssVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              content:
+                type: string
+                description: 短信内容
+              createBy:
+                type: string
+                description: 发送人，默认情况下显示当前用户
+              buildOrgId:
+                type: string
+              sendStatus:
+                type: string
+              sendStartTime:
+                type: string
+                format: date-time
+              sendEndTime:
+                type: string
+                format: date-time
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/SmsList'
+  /smses/send:
+    post:
+      tags:
+        - 短信管理sms
+      summary: '短信发送，后台需要根据各个发送人的发送接收情况依次写短信接收表'
+      operationId: sendSms
+      parameters:
+        - name: sendSmsVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+             content:
+               type: string
+             smsId:
+               type: string
+             receiveTels:
+               type: array
+               items:
+                 type: string
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /smses/sendStatus/{smsId}:
+    get:
+      tags:
+        - 短信管理sms
+      summary: '查看短信发送状态'
+      operationId: viewSendStatus
+      parameters:
+        - name: smsId
+          in: path
+          required: true
+          type: string
+          description: 短信ID
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/SmsReceive'
+####电话录音管理####
+  /telrecords/search:
+    post:
+      tags:
+        - 电话录音管理telrecord
+      summary: '根据条件查询电话录音列表-分页'
+      operationId: findTelrecords
+      parameters:
+        - name: telrecordVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              caller:
+                type: string
+              callee:
+                type: string
+              callBeginTime:
+                type: string
+                description: '根据录音开始时间查询'
+                format: date-time
+              callEndTime:
+                type: string
+                format: date-time
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/TelrecordList'
+
+####传真管理####
+  /faxs:
+    post:
+      tags:
+        - 传真管理fax
+      summary: '新增传真'
+      operationId: fax
+      parameters:
+        - name: telrecording
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FaxVo'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /faxs/{id}:
+    put:
+      tags:
+         - 传真管理fax
+      summary: '修改传真'
+      operationId: updateFax
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: fax
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/FaxVo'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+         - 传真管理fax
+      summary: '获取单条传真信息'
+      operationId: findfaxById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Fax'
+    delete:
+      tags:
+         - 传真管理fax
+      summary: '获取单条传真信息'
+      operationId: deleteFax
+      parameters:
+         - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /faxs/search:
+    post:
+      tags:
+        - 传真管理fax
+      summary: '根据条件查询传真列表-分页'
+      operationId: findFaxs
+      parameters:
+        - name: faxsVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              sender:
+                type: string
+              receiver:
+                type: string
+              fax:
+                type: string
+              createTimeStart:
+                type: string
+                description: '根据传真创建时间查询'
+                format: date-time
+              createTimeEnd:
+                type: string
+                format: date-time
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/FaxList'
+  /faxs/searchAll:
+    post:
+      tags:
+        - 传真管理fax
+      summary: '根据条件查询传真列表-不分页'
+      operationId: findtfaxsAll
+      parameters:
+        - name: faxVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              sender:
+                type: string
+              receiver:
+               type: string
+              fax:
+                type: string
+              createTimeStrat:
+                type: string
+                description: '根据传真创建时间查询'
+                format: date-time
+              createTimeEnd:
+                type: string
+                format: date-time
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Fax'
+  /sendfaxs/search:
+    post:
+      tags:
+        - 传真管理fax
+      summary: '根据条件查询已发送传真列表-分页'
+      operationId: findSendFaxs
+      parameters:
+        - name: sendfaxsVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              receiver:
+                type: string
+              faxNumber:
+                type: string
+              sendTimeStart:
+                type: string
+                format: date-time
+                description: '根据传真发送时间查询'
+              sendTimeEnd:
+                type: string
+                format: date-time
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/SendFaxList'
+  /recvfaxs/search:
+    post:
+      tags:
+        - 传真管理fax
+      summary: '根据条件查询已接收传真列表-分页'
+      operationId: findReciFaxs
+      parameters:
+        - name: recifaxsVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              sender:
+                type: string
+              faxNumber:
+                type: string
+              recvTimeStart:
+                type: string
+                format: date-time
+                description: '根据传真接收时间查询'
+              recvTimeEnd:
+                type: string
+                format: date-time
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/RecvFaxList'
+
+####组织机构分组【2018年12月26日根据浙能需求新增】####
+  /orgTeam:
+    post:
+      tags:
+        - 个人设置perSetting
+      summary: '新增组织机构分组'
+      operationId: addOrgTeam
+      parameters:
+        - name: orgTeam
+          in: body
+          required: true
+          schema:
+           $ref: '#/definitions/OrgTeam'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /orgTeam/{id}:
+    put:
+      tags:
+         - 个人设置perSetting
+      summary: '修改组织机构分组'
+      operationId: updateOrgTeam
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: orgTeam
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/OrgTeam'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+         - 个人设置perSetting
+      summary: '获取单条组织机构分组信息'
+      operationId: findOrgTeamById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/OrgTeam'
+    delete:
+      tags:
+        - 个人设置perSetting
+      summary: '删除单条组织机构分组信息，并删除该分组下的所有中间表信息'
+      operationId: deleteOrgTeam
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /orgTeam/searchAll:
+    get:
+     tags:
+       - 个人设置perSetting
+     summary: '获取当前用户的组织机构分组列表-不分页'
+     operationId: findOrgTeamAl
+     responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/OrgTeam'
+  /orgTeam/addAndRemove:
+    post:
+      tags:
+        - 个人设置perSetting
+      summary: '设置分组内组织机构，后台每次均将前一次数据删除，再增加新关联'
+      operationId: addAndRemoveOrg
+      parameters:
+        - name: orgTeamMidVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              teamId:
+                type: string
+              orgIds:
+                type: array
+                items:
+                  type: string
+                description: "组织机构可多选"
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /orgTeam/searchOrgsByTeamId/{id}:
+    get:
+      tags:
+        - 个人设置perSetting
+      summary: '根据分组ID获取分组下的组织机构信息'
+      operationId: searchOrgByTeamId
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/OrgTeamMid'
+
+####应急响应启动条件设置【2018年12月28日根据浙能需求新增】####
+  /conditionSet:
+    post:
+      tags:
+        - '应急响应启动条件设置conditionSetting【2018-12-28新增】'
+      summary: '新增事件类型对应不同等级的应急响应启动条件'
+      operationId: addConditionSetting
+      parameters:
+        - name: conSettingVo
+          in: body
+          required: true
+          schema:
+            type: array
+            items:
+              type: object
+              $ref: '#/definitions/ConditionSetting'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /consitionSet/{eventTypeId}:
+    get:
+      tags:
+        - '应急响应启动条件设置conditionSetting【2018-12-28新增】'
+      summary: '根据事件类型，获取该事件类型不同等级的应急响应条件'
+      operationId: findConSetById
+      parameters:
+        - name: eventTypeId
+          in: path
+          required: true
+          description: 事件类型ID
+          type: string
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/ConditionSetting'
+################ definitions#################
+definitions:
+####addresslist####
+  Contact:
+    type: object
+    properties:
+      id:
+        type: string
+      orgId:
+        type: string
+        description: 所属单位ID
+      orgName:
+        type: string
+        description: 所属单位名称
+      dutyTypeId:
+        type: string
+        description: 职务类型ID
+      dutyTypeName:
+        type: string
+        description: 职务类型名称
+      name:
+        type: string
+        description: 姓名
+      sex:
+        type: string
+        description: 性别
+      address:
+        type: string
+        description: 联系地址
+      postCode:
+        type: string
+        description: 邮编
+      addrSeq:
+        type: string
+        description: 头像地址
+      telephone:
+        type: string
+        description: 办公电话
+      homeTel:
+        type: string
+        description: 家庭电话
+      mobile:
+        type: string
+        description: 移动电话
+      email:
+        type: string
+        description: 邮箱
+      otherWay:
+        type: string
+        description: 其他联系方式
+      addType:
+        type: string
+        description: 通讯录类型
+      fax:
+        type: string
+        description: 传真
+      notes:
+        type: string
+        description: 备注
+  ContactList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Contact'
+####Contactteam####
+  Contactteam:
+    type: object
+    properties:
+      id:
+        type: string
+      teamName:
+        type: string
+      parentId:
+        type: string
+      leaf:
+        type: string
+      orders:
+        type: string
+      delFlag:
+        type: string
+      userId:
+        type: string
+        description: 当前用户ID
+  ContactteamList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        allOf:
+          - $ref: '#/definitions/Contactteam'
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/Contactteam'
+####Notice####
+  Notice:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      title:
+        type: string
+        description: 列表显示
+      noticeTypeId:
+        type: string
+      noticeTypeName:
+        type: string
+        description: 列表显示
+      content:
+        type: string
+      buildOrgId:
+        type: string
+      buildOrgName:
+        type: string
+        description: 列表显示
+      createBy:
+        type: string
+        description: 创建人
+      createTime:
+        type: string
+        format: date-time
+      sendStatus:
+        type: string
+        description: 列表显示，0未发送，1已发送
+      sendTime:
+        type: string
+        description: 列表显示
+      notes:
+        type: string
+  NoticeVo:
+    type: object
+    properties:
+      notice:
+        $ref: '#/definitions/Notice'
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 通知相关附件ID数组
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+  NoticeList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Notice'
+  NoticeRec:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      noticeId:
+        type: string
+      title:
+        type: string
+        description: 列表显示
+      noticeTypeId:
+        type: string
+      noticeTypeName:
+        type: string
+        description: 列表显示
+      content:
+        type: string
+      buildOrgId:
+        type: string
+      buildOrgName:
+        type: string
+        description: 列表显示
+      sendBy:
+        type: string
+        description: 发送人，列表显示
+      receiveOrgId:
+        type: string
+      isFeedback:
+        type: string
+        description: 列表显示，0未反馈，1已反馈
+      sendTime:
+        type: string
+        description: 列表显示
+      createTime:
+        type: string
+        format: 'date-time'
+        description: 创建时间
+  NoticeRecList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/NoticeRec'
+  NoticeRecieveOrg:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      noticeId:
+        type: string
+      sendBy:
+        type: string
+        description: 发送人，列表显示
+      receiveOrgId:
+        type: string
+      receiveOrgName:
+        type: string
+        description: 列表显示
+      isFeedback:
+        type: string
+        description: 列表显示
+      feedbackBy:
+        type: string
+        description: 列表显示
+      feedbackTime:
+        type: string
+        format: date-time
+        description: 列表显示
+      feedbackContent:
+        type: string
+        description: 列表显示
+  NoticeFeedback:
+    type: object
+    properties:
+      id:
+        type: string
+      noticeRecId:
+        type: string
+      feedbackBy:
+        type: string
+      content:
+        type: string
+      feedbackTime:
+        type: string
+        format: date-time
+      notes:
+        type: string
+####Sms####
+  Sms:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      content:
+        type: string
+        description: 列表显示
+      createBy:
+        type: string
+        description: 列表显示，短信的发送人
+      sendStatus:
+        type: string
+        description: 列表显示
+      sendTime:
+        type: string
+        description: 列表显示
+      receivers:
+        type: array
+        items:
+          properties:
+            receiverName:
+              type: string
+              description: 接收人姓名
+            receiverTel:
+              type: string
+              description: 接收人电话
+#
+#      receiverNames:
+#        type: array
+#        description: 列表显示，接收人姓名，若用户无姓名，则显示为电话
+#        items:
+#          type: string
+#      receiverTels:
+#        type: array
+#        description: 接收人电话
+#        items:
+#          type: string
+  SmsList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Sms'
+  SmsReceive:
+    type: object
+    properties:
+      id:
+        type: string
+      smsId:
+        type: string
+      sendStatus:
+        type: string
+        description: 短信发送状态，0未发送，1已发送，2发送失败
+      sendTime:
+        type: string
+        format: date-time
+        description: 发送时间
+      receiverName:
+        type: string
+        description: 接收人姓名，若用户之间输入电话号码，姓名也为电话号码
+      receiverTel:
+        type: string
+        description: 接收人电话
+      receiveTime:
+        type: string
+        format: date-time
+        description: 发送时间
+      receiveStatus:
+        type: string
+        description: 短信接收状态，0未接收，1已接收
+####telrecording####
+  Telrecord:
+    type: object
+    properties:
+      id:
+        type: string
+      caller:
+        type: string
+      callee:
+        type: string
+      callBeginTime:
+        type: string
+        format: date
+      callEndTime:
+        type: string
+        format: date
+      filePath:
+        type: string
+      callDuration:
+        type: string
+      fileSize:
+        type: string
+      fileName:
+        type: string
+  TelrecordList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Telrecord'
+####fax####
+  Fax:
+    type: object
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      ic:
+        type: string
+      ldc:
+        type: string
+      faxNumber:
+        type: string
+      sender:
+        type: string
+      receiver:
+        type: string
+      fileName:
+        type: string
+      page:
+        type: string
+      filePath:
+        type: string
+      notes:
+        type: string
+      sendflag:
+        type: string
+        description: 发送标识：（0：未发送；1：已发送）
+      createTime:
+        type: date
+  FaxVo:
+    type: object
+    properties:
+      fax:
+        $ref: '#/definitions/Fax'
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 传真相关附件ID数组
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+  FaxList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Fax'
+  SendFax:
+    type: object
+    properties:
+      id:
+        type: string
+      ic:
+        type: string
+      ldc:
+        type: string
+      title:
+        type: string
+      faxNumber:
+        type: string
+      sender:
+        type: string
+      receiver:
+        type: string
+      sendtime:
+        type: string
+        format: date-time
+      status:
+        type: string
+      retcode:
+        type: string
+      filePath:
+        type: string
+  SendFaxList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/SendFax'
+  RecvFax:
+    type: object
+    properties:
+      id:
+        type: string
+      ic:
+        type: string
+      ldc:
+        type: string
+      title:
+        type: string
+      faxNumber:
+        type: string
+      sender:
+        type: string
+      receiver:
+        type: string
+      recvtime:
+        type: string
+      page:
+        type: string
+      filePath:
+        type: string
+  RecvFaxList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/RecvFax'
+####orgTeam####
+  OrgTeam:
+    type: object
+    properties:
+      id:
+        type: string
+      teamName:
+        type: string
+      orders:
+        type: string
+  OrgTeamMid:
+    type: object
+    properties:
+      id:
+        type: string
+      teamId:
+        type: string
+      teamName:
+        type: string
+      orgId:
+        type: string
+      orgName:
+        type: string
+####conditionSetting####
+  ConditionSetting:
+    type: object
+    properties:
+      id:
+        type: string
+      eventTypeId:
+        type: string
+      eventTypeName:
+        type: string
+      eventGradeId:
+        type: string
+      eventGradeName:
+        type: string
+      conditionSetting:
+        type: string
+##### common model####
+  SearchBody:
+    type: object
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+############################ parameters#####################
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string

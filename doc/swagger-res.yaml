@@ -1,0 +1,4660 @@
+swagger: '2.0'
+info:
+  description: >-
+    应急知识、法律法规、案例知识、应急专家、救援队伍、社会依托资源、危险源、防护目标、物资、储备库、应急预案等。
+  version: 1.0.0
+  title: res基础资源
+host: 127.0.0.1:8000
+basePath: /emp-res/v1
+
+tags:
+  - name: 应急知识管理konwledge
+    description: 应急知识信息管理
+  - name: 法律法规管理law
+    description: 法律法规信息管理
+  - name: 案例管理case
+    description: 应急案例信息管理
+  - name: 应急专家管理expert
+    description: 应急专家信息管理
+  - name: 救援队伍管理team
+    description: 救援队伍信息管理
+  - name: 社会依托资源管理support
+    description: 社会依托资源信息管理
+  - name: 危险源管理hazard
+    description: 危险源信息管理
+  - name: 防护目标管理target
+    description: 防护目标信息管理
+  - name: 应急物资管理material
+    description: 应急物资信息管理
+  - name: 物资库管理repertory
+    description: 应急储备库/物资库信息管理
+  - name: 预案管理planBase
+    description: 预案基础信息管理
+  - name: 预案数字化-应急组织管理planOrg
+    description: 应急组织信息管理
+  - name: 预案数字化-责任单位/人管理
+    description: 责任单位/人信息管理
+  - name: 预案数字化-应急专家管理planExpert
+    description: 应急专家信息管理
+  - name: 预案数字化-应急队伍管理planTeam
+    description: 应急队伍信息管理
+  - name: 预案数字化-社会依托资源管理planSuppport
+    description: 社会依托资源信息管理
+  - name: 预案数字化-应急物资管理planMaterialType
+    description: 应急物资信息管理
+  - name: 预案数字化-任务设置管理planTask
+    description: 任务设置信息管理
+
+schemes:
+  - http
+paths:
+####应急知识####
+ /knowledges:
+   post:
+     tags:
+       - 应急知识管理konwledge
+     summary: '新增知识'
+     operationId: addKnowledge
+     parameters:
+       - name: knowledge
+         in: body
+         required: true
+         schema:
+            $ref: '#/definitions/KnowledegVo'
+
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /knowledges/{id}:
+    put:
+      tags:
+         - 应急知识管理konwledge
+      summary: '修改知识'
+      operationId: updateKnowledge
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: knowledgeVo
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/KnowledegVo'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+         - 应急知识管理konwledge
+      summary: '获取单条知识信息'
+      operationId: findKnowledgeById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Knowledge'
+    delete:
+      tags:
+        - 应急知识管理konwledge
+      summary: '删除单条知识信息'
+      operationId: deleteKnowledge
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /knowledges/search:
+   post:
+     tags:
+       - 应急知识管理konwledge
+     summary: '根据条件查询知识列表-分页'
+     operationId: findKnowledges
+     parameters:
+       - name: knowledgesPageVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             title:
+               type: string
+             eventTypeIds:
+               type: array
+               description: eventTypeIds为事件类型选择Ids，数组
+               items:
+                 type: string
+             keyWord:
+               type: string
+             knoTypeId:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/KnowledgeList'
+ /knowledges/searchAll:
+   post:
+     tags:
+       - 应急知识管理konwledge
+     summary: '根据条件查询知识列表-不分页'
+     operationId: findKnowledgesAll
+     parameters:
+       - name: knowledgeVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             title:
+               type: string
+             eventTypeIds:
+               type: array
+               description: eventTypeIds为事件类型选择Ids，数组
+               items:
+                 type: string
+             keyWord:
+               type: string
+             knoTypeId:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Knowledge'
+####法律法规####
+ /laws:
+   post:
+     tags:
+       - 法律法规管理law
+     summary: '新增法规'
+     operationId: addLaw
+     parameters:
+       - name: lawVo
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/LawVo'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /laws/{id}:
+   get:
+     tags:
+       - 法律法规管理law
+     summary: '获取单条法律法规'
+     operationId: findLawById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Law'
+   put:
+     tags:
+       - 法律法规管理law
+     summary: '编辑法规'
+     operationId: updateLaw
+     parameters:
+        - $ref: '#/parameters/id-p'
+        - name: lawVo
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/LawVo'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 法律法规管理law
+     summary: '删除法规'
+     operationId: deleteLaw
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /laws/search:
+   post:
+     tags:
+       - 法律法规管理law
+     summary: '根据条件查询法规列表-分页'
+     operationId: findLaws
+     parameters:
+       - name: lawPageVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             title:
+               type: string
+             keyWord:
+               type: string
+             buildOrg:
+               type: string
+             eventTypeIds:
+               type: array
+               description: eventTypeIds为事件类型选择Ids，数组
+               items:
+                 type: string
+             lawTypeIds:
+               type: array
+               items:
+                 type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/LawList'
+ /laws/searchAll:
+   post:
+     tags:
+       - 法律法规管理law
+     summary: '根据条件查询法规列表-不分页'
+     operationId: findLawsAll
+     parameters:
+       - name: lawVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             title:
+               type: string
+             keyWord:
+               type: string
+             buildOrg:
+               type: string
+             eventTypeIds:
+               type: array
+               description: eventTypeIds为事件类型选择Ids，数组
+               items:
+                 type: string
+             lawTypeIds:
+               type: array
+               items:
+                 type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Law'
+####案例管理####
+ /cases:
+   post:
+     tags:
+       - 案例管理case
+     summary: '新增应急案例，若系统录入的，则案例来源标识存为1，案例来源由用户输入，若系统事件归档，则案例来源标识存为0，案例来源存为事件归档'
+     operationId: addCase
+     parameters:
+       - name: caseVo
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/CaseVo'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /cases/{id}:
+   get:
+     tags:
+       - 案例管理case
+     summary: '获取单条案例信息'
+     operationId: findCaseById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Case'
+   put:
+     tags:
+       - 案例管理case
+     summary: '编辑案例信息'
+     operationId: updateCase
+     parameters:
+        - $ref: '#/parameters/id-p'
+        - name: case
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/CaseVo'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 案例管理case
+     summary: '删除案例信息'
+     operationId: deleteCase
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /cases/search:
+   post:
+     tags:
+       - 案例管理case
+     summary: '根据条件查询案例列表-分页'
+     operationId: findcases
+     parameters:
+       - name: casePageVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             title:
+               type: string
+               description: 案例名称
+             eventTypeIds:
+               type: array
+               description: eventTypeIds为事件类型选择Ids，数组
+               items:
+                 type: string
+             eventGradeId:
+               type: string
+               description: 事件级别id
+             sourceFlag:
+               type: string
+               description: 案例来源标识，0：系统归档，1：系统录入
+             occurStartTime:
+               type: string
+               format: date
+             occurEndTime:
+               type: string
+               format: date
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/CaseList'
+ /cases/searchAll:
+   post:
+     tags:
+       - 案例管理case
+     summary: '根据条件查询案例列表-不分页'
+     operationId: findCasesAll
+     parameters:
+       - name: caseVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             title:
+               type: string
+               description: 案例名称
+             eventTypeIds:
+               type: array
+               description: eventTypeIds为事件类型选择Ids，数组
+               items:
+                 type: string
+             eventGradeId:
+               type: string
+               description: 事件级别id
+             sourceFlag:
+               type: string
+               description: 案例来源标识，0：系统归档，1：系统录入
+             occurStartTime:
+               type: string
+               format: date
+             occurEndTime:
+               type: string
+               format: date
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Case'
+####应急专家####
+ /experts:
+   post:
+     tags:
+       - 应急专家管理expert
+     summary: '新增应急专家'
+     operationId: addExpert
+     parameters:
+       - name: expert
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Expert'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /experts/{id}:
+   get:
+     tags:
+       - 应急专家管理expert
+     summary: '获取单条专家信息'
+     operationId: findExpertById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Expert'
+   put:
+     tags:
+       - 应急专家管理expert
+     summary: '修改专家信息'
+     operationId: updateExpert
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: expert
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Expert'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 应急专家管理expert
+     summary: '删除专家信息'
+     operationId: deleteExpert
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /experts/search:
+   post:
+     tags:
+       - 应急专家管理expert
+     summary: '根据条件查询专家列表-分页'
+     operationId: findExperts
+     parameters:
+       - name: expertPageVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             unit:
+               type: string
+             eventTypeIds:
+               type: array
+               description: eventTypeIds为事件类型选择Ids，数组
+               items:
+                 type: string
+             specialty:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedExpertIds:
+               type: array
+               description: 已选专家IDS，在结果列表中，将这些专家去掉（预案数字化时使用）。
+               items:
+                 type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ExpertList'
+ /experts/searchAll:
+   post:
+     tags:
+       - 应急专家管理expert
+     summary: '根据查询条件查询专家列表-不分页'
+     operationId: findExpertsAll
+     parameters:
+       - name: expertVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             unit:
+               type: string
+             eventTypeIds:
+               type: array
+               description: eventTypeIds为事件类型选择Ids，数组
+               items:
+                 type: string
+             specialty:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedExpertIds:
+               type: array
+               description: 已选专家IDS，在结果列表中，将这些专家去掉（预案数字化时使用）。
+               items:
+                 type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Expert'
+ /experts/exportToExcel:
+   post:
+     tags:
+       - 应急专家管理expert
+     summary: '根据查询条件导出专家信息Excel'
+     operationId: exportToExcel
+     produces:
+       - 'application/octet-stream'
+     parameters:
+       - name: expertVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             unit:
+               type: string
+             eventTypeIds:
+               type: array
+               description: eventTypeIds为事件类型选择Ids，数组
+               items:
+                 type: string
+             specialty:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedExpertIds:
+               type: array
+               description: 已选专家IDS，在结果列表中，将这些专家去掉（预案数字化时使用）。
+               items:
+                 type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+
+####救援队伍####
+ /teams:
+   post:
+     tags:
+       - 救援队伍管理team
+     summary: '新增救援队伍'
+     operationId: addTeam
+     parameters:
+       - name: team
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Team'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /teams/{id}:
+   get:
+     tags:
+       - 救援队伍管理team
+     summary: '获取单条救援队伍'
+     operationId: findTeamById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Team'
+   put:
+     tags:
+       - 救援队伍管理team
+     summary: '修改救援队伍'
+     operationId: updateTeam
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: team
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Team'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 救援队伍管理team
+     summary: '删除救援队伍'
+     operationId: deleteTeam
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /teams/search:
+   post:
+     tags:
+       - 救援队伍管理team
+     summary: '根据条件查询队伍列表-分页'
+     operationId: findTeams
+     parameters:
+       - name: teamPageVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             teamName:
+               type: string
+             teamTypeIds:
+               type: array
+               items:
+                 type: string
+             teamPropertyId:
+               type: string
+             unit:
+               type: string
+             teamSpecialty:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedTeamIds:
+               type: array
+               description: 已选队伍IDS，在结果列表中，将这些队伍去掉（预案数字化时使用）。
+               items:
+                 type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/TeamList'
+ /teams/searchAll:
+   post:
+     tags:
+       - 救援队伍管理team
+     summary: '根据条件查询救援队伍列表-不分页'
+     operationId: findTeamsAll
+     parameters:
+       - name: teamVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             teamName:
+               type: string
+             teamTypeIds:
+               type: array
+               items:
+                 type: string
+             unit:
+               type: string
+             teamPropertyId:
+               type: string
+             teamSpecialty:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedTeamIds:
+               type: array
+               description: 已选队伍IDS，在结果列表中，将这些队伍去掉（预案数字化时使用）。
+               items:
+                 type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Team'
+ /teams/searchAllForGis:
+   post:
+     tags:
+       - 救援队伍管理team
+     summary: '根据GIS数据格式要求获取救援队伍图层信息-不分页'
+     operationId: searchAllTeamForGis
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/TeamForGis'
+ /teams/searchTeamForGisByOrg:
+   post:
+     tags:
+       - 救援队伍管理team
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有应急队伍（去除没有经纬度的和经纬度格式不规范的）-分页。该组织机构码为浙能特定编码'
+     operationId: searchTeamForGisByOrg
+     parameters:
+       - name: teamPageForGisVo
+         in: body
+         required: true
+         schema:
+           properties:
+             orgCode:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/TeamListForGis'
+ /teams/searchAllTeamForGisByOrg:
+   get:
+     tags:
+       - 救援队伍管理team
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有应急队伍（去除没有经纬度的和经纬度格式不规范的）-不分页。该组织机构码为浙能特定编码'
+     operationId: searchAllTeamForGisByOrg
+     parameters:
+       - name: orgCode
+         in: query
+         required: true
+         type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/TeamForGis'
+ /teams/exportToExcel:
+   post:
+     tags:
+       - 救援队伍管理team
+     summary: '根据查询条件导出救援队伍信息Excel'
+     operationId: exportToExcel
+     produces:
+       - 'application/octet-stream'
+     parameters:
+       - name: teamVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             teamName:
+               type: string
+             teamTypeIds:
+               type: array
+               items:
+                 type: string
+             unit:
+               type: string
+             teamPropertyId:
+               type: string
+             teamSpecialty:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedTeamIds:
+               type: array
+               description: 已选队伍IDS，在结果列表中，将这些队伍去掉（预案数字化时使用）。
+               items:
+                 type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+
+####社会依托资源####
+ /supports:
+   post:
+     tags:
+       - 社会依托资源管理support
+     summary: '新增社会依托资源'
+     operationId: addSupport
+     parameters:
+       - name: support
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Support'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /supports/{id}:
+   get:
+     tags:
+       - 社会依托资源管理support
+     summary: '获取单条社会依托资源信息'
+     operationId: findSupportById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Support'
+   put:
+     tags:
+       - 社会依托资源管理support
+     summary: '修改社会依托资源信息'
+     operationId: updateSupport
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: support
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Support'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 社会依托资源管理support
+     summary: '删除社会依托资源信息'
+     operationId: deleteSupport
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /supports/search:
+   post:
+     tags:
+       - 社会依托资源管理support
+     summary: '根据条件查询社会依托资源列表-分页'
+     operationId: findSupports
+     parameters:
+       - name: supportPageVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             typeIds:
+               type: array
+               description: 社会依托资源查询条件：资源类型树，多选
+               items:
+                 type: string
+             address:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedSupportIds:
+               type: array
+               description: 已选依托资源IDS，在结果列表中，将这些资源去掉（预案数字化时使用）。
+               items:
+                 type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/SupportList'
+ /supports/searchAll:
+   post:
+     tags:
+       - 社会依托资源管理support
+     summary: '根据条件获取社会依托资源列表-不分页'
+     operationId: findSupportsAll
+     parameters:
+       - name: supportVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             typeId:
+               type: array
+               description: 社会依托资源查询条件：资源类型树，多选
+               items:
+                 type: string
+             address:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedSupportIds:
+               type: array
+               description: 已选依托资源IDS，在结果列表中，将这些资源去掉（预案数字化时使用）。
+               items:
+                 type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Support'
+ /supports/searchAllForGis:
+   post:
+     tags:
+       - 社会依托资源管理support
+     summary: '根据GIS数据格式要求获取社会依托资源图层信息（去除没有经纬度的和经纬度格式不规范的）-不分页'
+     operationId: searchAllSupportForGis
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/SupportForGis'
+ /supports/searchSupportForGisByOrg:
+   post:
+     tags:
+       - 社会依托资源管理support
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有社会依托资源（去除没有经纬度的和经纬度格式不规范的）-分页。该组织机构码为浙能特定编码'
+     operationId: searchSupportForGisByOrg
+     parameters:
+       - name: supportPageForGisVo
+         in: body
+         required: true
+         schema:
+           properties:
+             orgCode:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/SupportListForGis'
+ /supports/searchAllSupportForGisByOrg:
+   get:
+     tags:
+       - 社会依托资源管理support
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有社会依托资源（去除没有经纬度的和经纬度格式不规范的）-不分页。该组织机构码为浙能特定编码'
+     operationId: searchAllSupportForGisByOrg
+     parameters:
+       - name: orgCode
+         in: query
+         required: true
+         type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/SupportForGis'
+ /supports/exportToExcel:
+   post:
+     tags:
+       - 社会依托资源管理support
+     summary: '根据查询条件导出社会依托资源信息Excel'
+     operationId: exportToExcel
+     produces:
+       - 'application/octet-stream'
+     parameters:
+       - name: supportVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             typeId:
+               type: array
+               description: 社会依托资源查询条件：资源类型树，多选
+               items:
+                 type: string
+             address:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedSupportIds:
+               type: array
+               description: 已选依托资源IDS，在结果列表中，将这些资源去掉（预案数字化时使用）。
+               items:
+                 type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+
+####危险源####
+ /hazards:
+   post:
+     tags:
+       - 危险源管理hazard
+     summary: '新增危险源'
+     operationId: addHazard
+     parameters:
+       - name: hazard
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Hazard'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /hazards/{id}:
+   get:
+     tags:
+       - 危险源管理hazard
+     summary: '获取单条危险源信息'
+     operationId: findHazardById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Hazard'
+   put:
+     tags:
+       - 危险源管理hazard
+     summary: '修改危险源信息'
+     operationId: updateHazard
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: hazard
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Hazard'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 危险源管理hazard
+     summary: '删除危险源信息'
+     operationId: deleteHazard
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /hazards/search:
+   post:
+     tags:
+       - 危险源管理hazard
+     summary: '根据条件查询危险源信息列表-分页'
+     operationId: findHazards
+     parameters:
+       - name: hazardPageVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+               description: 危险源名称
+             danTypeIds:
+               type: array
+               description: danTypeIds为危险源类别选择Ids，数组
+               items:
+                 type: string
+             danGradeId:
+               type: string
+               description: 危险源级别id
+             unit:
+               type: string
+               description: 所属单位
+             majorHazard:
+               type: string
+               description: 主要危险物
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/HazardList'
+ /hazards/searchAll:
+   post:
+     tags:
+       - 危险源管理hazard
+     summary: '根据条件获取危险源列表-不分页'
+     operationId: findHazardsAll
+     parameters:
+       - name: hazardVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+               description: 危险源名称
+             danTypeIds:
+               type: array
+               description: danTypeIds为危险源类别选择Ids，数组
+               items:
+                 type: string
+             danGradeId:
+               type: string
+               description: 危险源级别id
+             unit:
+               type: string
+               description: 所属单位
+             majorHazard:
+               type: string
+               description: 主要危险物
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Hazard'
+ /hazards/searchAllForGis:
+   post:
+     tags:
+       - 危险源管理hazard
+     summary: '根据GIS数据格式要求获取危险源图层信息-不分页'
+     operationId: searchAllHazardForGis
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/HazardForGis'
+ /hazards/searchHazardsForGisByOrg:
+   post:
+     tags:
+       - 危险源管理hazard
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有危险源（去除没有经纬度的和经纬度格式不规范的）-分页。该组织机构码为浙能特定编码'
+     operationId: searchHazardsForGisByOrg
+     parameters:
+       - name: hazardPageForGisVo
+         in: body
+         required: true
+         schema:
+           properties:
+             orgCode:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/HazardListForGis'
+ /hazards/searchAllHazardsForGisByOrg:
+   get:
+     tags:
+       - 危险源管理hazard
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有危险源（去除没有经纬度的和经纬度格式不规范的）-不分页。该组织机构码为浙能特定编码'
+     operationId: searchAllHazardsForGisByOrg
+     parameters:
+       - name: orgCode
+         in: query
+         required: true
+         type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/HazardForGis'
+ /hazards/exportToExcel:
+   post:
+     tags:
+       - 危险源管理hazard
+     summary: '根据查询条件导出危险源信息Excel'
+     operationId: exportToExcel
+     produces:
+       - 'application/octet-stream'
+     parameters:
+       - name: hazardVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+               description: 危险源名称
+             danTypeIds:
+               type: array
+               description: danTypeIds为危险源类别选择Ids，数组
+               items:
+                 type: string
+             danGradeId:
+               type: string
+               description: 危险源级别id
+             unit:
+               type: string
+               description: 所属单位
+             majorHazard:
+               type: string
+               description: 主要危险物
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+
+####防护目标####
+ /targets:
+   post:
+     tags:
+       - 防护目标管理target
+     summary: '新增防护目标'
+     operationId: addTarget
+     parameters:
+       - name: target
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Target'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /targets/{id}:
+   get:
+     tags:
+       - 防护目标管理target
+     summary: '获取单条防护目标信息'
+     operationId: findTargetById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Target'
+   put:
+     tags:
+       - 防护目标管理target
+     summary: '修改防护目标信息'
+     operationId: updateTarget
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: target
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Target'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 防护目标管理target
+     summary: '删除防护目标信息'
+     operationId: deleteTarget
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /targets/search:
+   post:
+     tags:
+       - 防护目标管理target
+     summary: '根据条件查询防护目标信息列表-分页'
+     operationId: findTargets
+     parameters:
+       - name: targetPageVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+               description: 防护目标名称
+             targetTypeIds:
+               type: array
+               description: targetTypeIds为防护目标类别选择Ids，数组
+               items:
+                 type: string
+             unit:
+               type: string
+               description: 所属单位
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/TargetList'
+ /targets/searchAll:
+   post:
+     tags:
+       - 防护目标管理target
+     summary: '根据条件获取防护目标列表-不分页'
+     operationId: findTargetsAll
+     parameters:
+       - name: targetVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+               description: 防护目标名称
+             targetTypeIds:
+               type: array
+               description: targetTypeIds为防护目标类别选择Ids，数组
+               items:
+                 type: string
+             unit:
+               type: string
+               description: 所属单位
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Target'
+ /targets/searchAllForGis:
+   post:
+     tags:
+       - 防护目标管理target
+     summary: '根据GIS数据格式要求获取防护目标图层信息-不分页'
+     operationId: searchAllTargetForGis
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/TargetForGis'
+ /targets/searchTargetForGisByOrg:
+   post:
+     tags:
+       - 防护目标管理target
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有防护目标（去除没有经纬度的和经纬度格式不规范的）-分页。该组织机构码为浙能特定编码'
+     operationId: searchTargetForGisByOrg
+     parameters:
+       - name: targetPageForGisVo
+         in: body
+         required: true
+         schema:
+           properties:
+             orgCode:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/TargetListForGis'
+ /targets/searchAllTargetForGisByOrg:
+   get:
+     tags:
+       - 防护目标管理target
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有防护目标（去除没有经纬度的和经纬度格式不规范的）-不分页。该组织机构码为浙能特定编码'
+     operationId: searchAllTargetForGisByOrg
+     parameters:
+       - name: orgCode
+         in: query
+         required: true
+         type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/TargetForGis'
+ /targets/exportToExcel:
+   post:
+     tags:
+       - 防护目标管理target
+     summary: '根据查询条件导出防护目标信息Excel'
+     operationId: exportToExcel
+     produces:
+       - 'application/octet-stream'
+     parameters:
+       - name: targetVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+               description: 防护目标名称
+             targetTypeIds:
+               type: array
+               description: targetTypeIds为防护目标类别选择Ids，数组
+               items:
+                 type: string
+             unit:
+               type: string
+               description: 所属单位
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+
+####应急物资####
+ /materials:
+   post:
+     tags:
+       - 应急物资管理material
+     summary: '新增应急物资'
+     operationId: addMaterial
+     parameters:
+       - name: Material
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Material'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /materials/{id}:
+   get:
+     tags:
+       - 应急物资管理material
+     summary: '获取单条应急物资'
+     operationId: findMaterialById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Material'
+   put:
+     tags:
+       - 应急物资管理material
+     summary: '修改应急物资'
+     operationId: updateMaterial
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: material
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Material'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 应急物资管理material
+     summary: '删除应急物资'
+     operationId: deleteMaterial
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /materials/search:
+   post:
+     tags:
+       - 应急物资管理material
+     summary: '根据条件查询物资列表-分页'
+     operationId: findMaterials
+     parameters:
+       - name: materialPageVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             resTypeIds:
+               type: array
+               items:
+                 type: string
+             specModel:
+               type: string
+             repertoryId:
+               type: string
+               description: 物资创建所属库
+             positionId:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedMaterialIds:
+               type: array
+               description: 已选物资IDS，在结果列表中，将这些物资去掉（处置方案时使用）。
+               items:
+                 type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/MaterialList'
+ /materials/searchAll:
+   post:
+     tags:
+       - 应急物资管理material
+     summary: '根据条件查询应急物资列表-不分页'
+     operationId: findMaterialAll
+     parameters:
+       - name: materialVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             resTypeIds:
+               type: array
+               items:
+                 type: string
+             specModel:
+               type: string
+             repertoryId:
+               type: string
+               description: 物资创建所属库
+             positionId:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedMaterialIds:
+               type: array
+               description: 已选物资IDS，在结果列表中，将这些物资去掉（处置方案时使用）。
+               items:
+                 type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Material'
+ /materials/searchAllForGis:
+   post:
+     tags:
+       - 应急物资管理material
+     summary: '根据GIS数据格式要求获取应急物资图层信息-不分页'
+     operationId: searchAllMaterialForGis
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/MaterialForGis'
+ /materials/searchMaterialForGisByOrg:
+   post:
+     tags:
+       - 应急物资管理material
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有应急物资（去除没有经纬度的和经纬度格式不规范的）-分页。该组织机构码为浙能特定编码'
+     operationId: searchMaterialForGisByOrg
+     parameters:
+       - name: materialPageForGisVo
+         in: body
+         required: true
+         schema:
+           properties:
+             orgCode:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/MaterialListForGis'
+ /materials/searchAllMaterialForGisByOrg:
+   get:
+     tags:
+       - 应急物资管理material
+     summary: '【浙能需求】根据组织机构获取该机构下对应的所有应急物资（去除没有经纬度的和经纬度格式不规范的）-不分页。该组织机构码为浙能特定编码'
+     operationId: searchAllMaterialForGisByOrg
+     parameters:
+       - name: orgCode
+         in: query
+         required: true
+         type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/MaterialForGis'
+ /materials/exportToExcel:
+   post:
+     tags:
+       - 应急物资管理material
+     summary: '根据查询条件导出应急物资信息Excel'
+     operationId: exportToExcel
+     produces:
+       - 'application/octet-stream'
+     parameters:
+       - name: materialVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             resTypeIds:
+               type: array
+               items:
+                 type: string
+             specModel:
+               type: string
+             repertoryId:
+               type: string
+               description: 物资创建所属库
+             positionId:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+             selectedMaterialIds:
+               type: array
+               description: 已选物资IDS，在结果列表中，将这些物资去掉（处置方案时使用）。
+               items:
+                 type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+
+####物资库####
+ /repertorys:
+   post:
+     tags:
+       - 物资库管理repertory
+     summary: '新增物资库'
+     operationId: addRepertory
+     parameters:
+       - name: Repertory
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Repertory'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /repertorys/{id}:
+   get:
+     tags:
+       - 物资库管理repertory
+     summary: '获取单条物资库信息'
+     operationId: findRepertoryById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Repertory'
+   put:
+     tags:
+       - 物资库管理repertory
+     summary: '修改物资库'
+     operationId: updateRepertory
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: repertory
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/Repertory'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 物资库管理repertory
+     summary: '删除物资库'
+     operationId: deleteRepertory
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /repertorys/search:
+   post:
+     tags:
+       - 物资库管理repertory
+     summary: '根据条件查询物资库列表-分页'
+     operationId: findRepertorys
+     parameters:
+       - name: repertoryVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+            name:
+              type: string
+            address:
+              type: string
+            unit:
+              type: string
+            createOrgId:
+              type: string
+              description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/RepertoryList'
+ /repertorys/searchAll:
+   post:
+     tags:
+       - 物资库管理repertory
+     summary: '根据条件查询物资库列表-不分页'
+     operationId: findRepertorysAll
+     parameters:
+       - name: repertoryVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             name:
+               type: string
+             address:
+               type: string
+             unit:
+               type: string
+             createOrgId:
+               type: string
+               description: （暂时不传参）创建单位编码，若不为空，则根据登录用户所属单位编码进行过滤，展示该单位及其下级单位的所有信息。
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Repertory'
+ /repertorys/searchPositions:
+   post:
+     tags:
+       - 物资库管理repertory
+     summary: '根据条件获取仓位列表-不分页'
+     operationId: findPositionsByRepertoryId
+     parameters:
+       - name: positionVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             repertoryId:
+               type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Position'
+ /repertorys/searchAllForGis:
+   post:
+     tags:
+       - 物资库管理repertory
+     summary: '根据GIS数据格式要求获取应急物资库图层信息-不分页'
+     operationId: searchAllRepertoryForGis
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/RepertoryForGis'
+####预案管理####
+ /planCaltrees:
+   post:
+     tags:
+       - 预案管理planBase
+     summary: '新增预案目录'
+     operationId: addPlanCaltree
+     parameters:
+       - name: planCaltree
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/PlanCaltree'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planCaltrees/{id}:
+   put:
+     tags:
+       - 预案管理planBase
+     summary: '修改预案目录'
+     operationId: updatePlanCaltree
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: planCaltree
+         in: body
+         required: true
+         schema:
+            $ref: '#/definitions/PlanCaltree'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   get:
+     tags:
+       - 预案管理planBase
+     summary: '获取单条预案目录信息'
+     operationId: findPlanCaltreeById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/PlanCaltree'
+   delete:
+     tags:
+       - 预案管理planBase
+     summary: '删除单条预案目录信息'
+     operationId: deletePlanCaltree
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planCaltrees/searchAll:
+   post:
+     tags:
+       - 预案管理planBase
+     summary: '根据条件查询预案目录列表-不分页'
+     operationId: findPlanCaltreeAll
+     parameters:
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/PlanCaltreeList'
+ /plans:
+   post:
+     tags:
+       - 预案管理planBase
+     summary: '新增预案'
+     operationId: addPlan
+     parameters:
+       - name: Plan
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/PlanVo'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /plans/{id}:
+   get:
+     tags:
+       - 预案管理planBase
+     summary: 获取单个预案信息
+     operationId: findPlanById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description:  OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/Plan'
+   put:
+     tags:
+       - 预案管理planBase
+     summary: '修改预案信息'
+     operationId: updatePlan
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: plan
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/PlanVo'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 预案管理planBase
+     summary: '删除预案'
+     operationId: deletePlan
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /plans/search:
+   post:
+     tags:
+       - 预案管理planBase
+     summary: '根据条件查询预案列表-分页，默认情况下查询目录树下第一个叶子节点下的预案'
+     operationId: findPlans
+     parameters:
+       - name: planVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planCaltreeId:
+               type: string
+               description: 预案目录ID
+             name:
+               type: string
+             planTypeId:
+               type: string
+             eventTypeIds:
+               type: array
+               items:
+                 type: string
+             createOrgIds:
+               type: array
+               items:
+                 type: string
+             selectedPlanIds:
+               type: array
+               description: 已选预案IDS，在结果列表中，将这些预案去掉（选择启动预案时使用）。
+               items:
+                  type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/PlanList'
+ /plans/searchAll:
+   post:
+     tags:
+       - 预案管理planBase
+     summary: '根据条件查询预案列表-不分页'
+     operationId: findPlansAll
+     parameters:
+       - name: planVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planCaltreeId:
+               type: string
+               description: 预案目录ID
+             name:
+               type: string
+             planTypeId:
+               type: string
+             eventTypeIds:
+               type: array
+               items:
+                 type: string
+             createOrgIds:
+               type: array
+               items:
+                 type: string
+             selectedPlanIds:
+               type: array
+               description: 已选预案IDS，在结果列表中，将这些预案去掉（选择启动预案时使用）。
+               items:
+                 type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Plan'
+####预案数字化应急组织管理####
+ /planOrgs:
+   post:
+     tags:
+        - 预案数字化-应急组织管理planOrg
+     summary: '新增应急组织'
+     operationId: addplanOrg
+     parameters:
+       - name: planOrg
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/planOrg'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planOrgs/{id}:
+   get:
+     tags:
+       - 预案数字化-应急组织管理planOrg
+     summary: 获取单个应急组织信息
+     operationId: findplanOrgById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description:  OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/planOrg'
+   put:
+     tags:
+       - 预案数字化-应急组织管理planOrg
+     summary: '修改应急组织信息'
+     operationId: updateplanOrg
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: planorg
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/planOrg'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 预案数字化-应急组织管理planOrg
+     summary: '删除应急组织'
+     operationId: deleteplanOrg
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planOrgs/searchAll:
+   post:
+     tags:
+       - 预案数字化-应急组织管理planOrg
+     summary: '根据条件查询应急组织树'
+     operationId: findplanOrgsAll
+     parameters:
+       - name: planorgVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/planOrgList'
+ /planOrgs/searchOrgsByPlanIds:
+   post:
+     tags:
+       - '预案数字化-应急组织管理planOrg'
+     summary: 根据预案ID数组，查询其对应的所有应急组织信息-不分页
+     operationId: searchOrgsByPlanIds
+     parameters:
+       - name: planIds
+         required: true
+         in: body
+         schema:
+           type: array
+           items:
+             type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/planOrgList'
+####预案数字化责任单位/人管理####
+ /planOrgRespons:
+   post:
+     tags:
+       - '预案数字化-责任单位/人管理'
+     summary: '新增责任单位/人'
+     operationId: addplanOrgRespon
+     parameters:
+       - name: planOrgRespon
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/planOrgRespon'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planOrgRespons/{id}:
+   get:
+     tags:
+       - '预案数字化-责任单位/人管理'
+     summary: 获取单个责任单位/人信息
+     operationId: findplanOrgResponById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description:  OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/planOrgRespon'
+   put:
+     tags:
+       - '预案数字化-责任单位/人管理'
+     summary: '修改责任单位/人信息'
+     operationId: updateplanOrgRespon
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: planOrgRespon
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/planOrgRespon'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - '预案数字化-责任单位/人管理'
+     summary: '删除责任单位/人'
+     operationId: deleteplanOrgRespon
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planOrgRespons/searchAll:
+   post:
+     tags:
+       - '预案数字化-责任单位/人管理'
+     summary: '根据条件查询责任单位/人列表-不分页'
+     operationId: findplanOrgResponsAll
+     parameters:
+       - name: planOrgResponVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planOrgId:
+               type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/planOrgRespon'
+ /planOrgRespons/searchOrgResponsByPlanOrgIds:
+   post:
+     tags:
+       - '预案数字化-责任单位/人管理'
+     summary: 根据预案应急组织ID数组，查询其对应的所有应急组织责任单位/人-不分页
+     operationId: searchOrgResponsByPlanOrgIds
+     parameters:
+       - name: planOrgIds
+         required: true
+         in: body
+         schema:
+           type: array
+           items:
+             type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/planOrgRespon'
+####预案数字化应急专家管理####
+ /planExperts:
+   post:
+     tags:
+       - 预案数字化-应急专家管理planExpert
+     summary: '新增应急专家与预案的关联'
+     operationId: addplanExpert
+     parameters:
+       - name: planExpert
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+             eventGradeName:
+               type: string
+             expertIds:
+               type: array
+               items:
+                 type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planExperts/removeExpert:
+   post:
+     tags:
+       - '预案数字化-应急专家管理planExpert'
+     summary: '移除应急专家与预案的关联'
+     operationId: removeExpertFromPlan
+     parameters:
+       - name: expertRemoveVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+             expertId:
+               type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planExperts/search:
+   post:
+     tags:
+       - '预案数字化-应急专家管理planExpert'
+     summary: '根据条件查询预案指定响应级别对应的应急专家列表-分页'
+     operationId: findplanExpert
+     parameters:
+       - name: planExpertVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ExpertList'
+ /planExperts/searchAll:
+   post:
+     tags:
+       - '预案数字化-应急专家管理planExpert'
+     summary: '根据条件查询预案指定响应级别对应的应急专家列表-不分页'
+     operationId: findplanExpertsAll
+     parameters:
+       - name: planExpertVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Expert'
+ /planExperts/searchExpertsByPlanIds:
+   post:
+     tags:
+       - '预案数字化-应急专家管理planExpert'
+     summary: 根据预案ID数组，查询其对应的所有专家信息（去重复）-不分页
+     operationId: searchExpertsByPlanIds
+     parameters:
+       - name: planIds
+         required: true
+         in: body
+         schema:
+           type: array
+           items:
+             type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Expert'
+####预案数字化应急队伍管理####
+ /planTeams:
+   post:
+     tags:
+       - '预案数字化-应急队伍管理planTeam'
+     summary: '新增应急队伍与预案的关联'
+     operationId: addplanTeam
+     parameters:
+       - name: planTeam
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+             eventGradeName:
+               type: string
+             teamIds:
+               type: array
+               items:
+                 type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planTeams/removeTeam:
+   post:
+     tags:
+       - '预案数字化-应急队伍管理planTeam'
+     summary: '移除应急队伍与预案的关联'
+     operationId: removeTeamFromPlan
+     parameters:
+       - name: teamRemoveVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+             teamId:
+               type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planTeams/search:
+   post:
+     tags:
+       - '预案数字化-应急队伍管理planTeam'
+     summary: '根据条件查询预案指定响应级别对应的应急救援队伍列表-分页'
+     operationId: findplanTeam
+     parameters:
+       - name: planTeamVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/TeamList'
+ /planTeams/searchAll:
+   post:
+     tags:
+       - '预案数字化-应急队伍管理planTeam'
+     summary: '根据条件查询预案指定响应级别对应的应急救援队伍列表-不分页'
+     operationId: findplanTeamsAll
+     parameters:
+       - name: planTeamVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Team'
+ /planTeams/searcTeamshByPlanIds:
+   post:
+     tags:
+       - '预案数字化-应急队伍管理planTeam'
+     summary: 根据预案ID数组，查询其对应的所有队伍信息（去重复）-不分页
+     operationId: searcTeamshByPlanIds
+     parameters:
+       - name: planIds
+         required: true
+         in: body
+         schema:
+           type: array
+           items:
+             type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Team'
+####预案数字化社会依托资源管理####
+ /planSupports:
+   post:
+     tags:
+       - '预案数字化-社会依托资源管理planSuppport'
+     summary: '新增社会依托资源与预案的关联'
+     operationId: addplanSupport
+     parameters:
+       - name: planSupport
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+             eventGradeName:
+               type: string
+             supportIds:
+               type: array
+               items:
+                 type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planSupports/removeSupport:
+   post:
+     tags:
+       - '预案数字化-社会依托资源管理planSuppport'
+     summary: '移除社会依托资源与预案的关联'
+     operationId: removeSupportFromPlan
+     parameters:
+       - name: supportRemoveVo
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+             supportId:
+               type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planSupports/search:
+   post:
+     tags:
+       - '预案数字化-社会依托资源管理planSuppport'
+     summary: '根据条件查询预案指定响应级别对应的社会依托资源列表-分页'
+     operationId: findplanSupport
+     parameters:
+       - name: planSupportVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/SupportList'
+ /planSupports/searchAll:
+   post:
+     tags:
+       - '预案数字化-社会依托资源管理planSuppport'
+     summary: '根据条件查询预案指定响应级别对应的社会依托资源列表-不分页'
+     operationId: findplanSupportsAll
+     parameters:
+       - name: planSupportVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Support'
+ /planSupports/searchSupportsByPlanIds:
+   post:
+     tags:
+       - '预案数字化-社会依托资源管理planSuppport'
+     summary: 根据预案ID数组，查询其对应的所有依托资源信息（去重复）-不分页
+     operationId: searchSupportsByPlanIds
+     parameters:
+       - name: planIds
+         required: true
+         in: body
+         schema:
+           type: array
+           items:
+             type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Support'
+####预案数字化应急物资类型管理####
+ /planMaterials:
+   post:
+     tags:
+       - '预案数字化-应急物资管理planMaterialType'
+     summary: '新增、移除应急物资与预案的关联，后台每次均将前一次数据删除，再增加新关联'
+     operationId: addplanMaterial
+     parameters:
+       - name: planMaterial
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+             eventGradeName:
+               type: string
+             materialTypeIds:
+               type: array
+               items:
+                 type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planMaterials/searchAll:
+   post:
+     tags:
+       - '预案数字化-应急物资管理planMaterialType'
+     summary: '根据条件查询预案指定响应级别对应的物资类型已选树'
+     operationId: findplanMaterial
+     parameters:
+       - name: planMaterialVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/planMaterial'
+ /planMaterials/searchMatersByPlanIds:
+   post:
+     tags:
+       - '预案数字化-应急物资管理planMaterialType'
+     summary: 根据预案ID数组，查询其对应的所有物资信息（去重复），不是物资类型-不分页
+     operationId: searchMatersByPlanIds
+     parameters:
+       - name: planIds
+         required: true
+         in: body
+         schema:
+           type: array
+           items:
+             type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/Material'
+####预案数字化任务设置管理####
+ /planTasks:
+   post:
+     tags:
+       - '预案数字化-任务设置管理planTask'
+     summary: '新增任务设置'
+     operationId: addplanTask
+     parameters:
+       - name: planTask
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/planTask'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planTasks/{id}:
+   get:
+     tags:
+       - '预案数字化-任务设置管理planTask'
+     summary: 获取单个任务设置信息
+     operationId: findplanTaskById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description:  OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/planTask'
+   put:
+     tags:
+       - '预案数字化-任务设置管理planTask'
+     summary: '修改任务设置信息'
+     operationId: updateplanTask
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: plantask
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/planTask'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - '预案数字化-任务设置管理planTask'
+     summary: '删除任务设置'
+     operationId: deleteplanTask
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /planTasks/search:
+   post:
+     tags:
+       - '预案数字化-任务设置管理planTask'
+     summary: '根据条件查询任务设置列表-分页'
+     operationId: findplanTask
+     parameters:
+       - name: plantaskVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+             princiOrgIds:
+               type: array
+               items:
+                 type: string
+               description: 责任单位数组
+             principalName:
+               type: string
+             title:
+               type: string
+           allOf:
+             - $ref: '#/definitions/SearchBody'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/planTaskList'
+ /planTasks/searchAll:
+   post:
+     tags:
+       - '预案数字化-任务设置管理planTask'
+     summary: '根据条件查询任务设置列表-不分页'
+     operationId: findplanTasksAll
+     parameters:
+       - name: plantaskVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             planId:
+               type: string
+             eventGradeId:
+               type: string
+             princiOrgIds:
+               type: array
+               items:
+                 type: string
+             principalName:
+               type: string
+             title:
+               type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/planTask'
+ /planTasks/searchTaskByPlanIds:
+   post:
+     tags:
+       - '预案数字化-任务设置管理planTask'
+     summary: 根据预案ID数组，查询其对应的所有任务信息-不分页
+     operationId: searchTaskByPlanIds
+     parameters:
+       - name: planIds
+         required: true
+         in: body
+         schema:
+           type: array
+           items:
+             type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/planTask'
+#### definition####
+definitions:
+####knowledge####
+  Knowledge:
+    type: object
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+        description: 列表显示
+      knoTypeId:
+        type: string
+      knoTypeName:
+        type: string
+        description: 列表显示，新增时前端可不传该属性
+      eventTypeId:
+        type: string
+      eventTypeName:
+        type: string
+        description: 列表显示，新增时前端可不传该属性
+      source:
+        type: string
+      keyWord:
+        type: string
+      content:
+        type: string
+        description: 列表显示
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+  KnowledegVo:
+    type: object
+    properties:
+      knowledge:
+        $ref: '#/definitions/Knowledge'
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 知识相关附件ID数组
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+  KnowledgeList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Knowledge'
+####law####
+  Law:
+   type: object
+   properties:
+     id:
+       type: string
+     title:
+       type: string
+       description: 列表显示
+     buildOrg:
+       type: string
+       description: 列表显示
+     lawTypeId:
+       type: string
+     lawTypeName:
+       type: string
+       description: 列表显示，新增时前端可不传该属性
+     eventTypeId:
+       type: string
+     eventTypeName:
+       type: string
+       description: 列表显示，新增时前端可不传该属性
+     appliedRange:
+       type: string
+     pubTime:
+       type: string
+       format: date
+     inureTime:
+       type: string
+       format: date
+     keyWord:
+       type: string
+       description: 列表显示
+     summary:
+       type: string
+     content:
+       type: string
+     createOrgId:
+       type: string
+       description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+  LawVo:
+    type: object
+    properties:
+      law:
+        $ref: '#/definitions/Law'
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 法规相关附件ID数组（上传的）
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+  LawList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Law'
+####case####
+  Case:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 主键
+      title:
+        type: string
+        description: 列表显示
+      eventId:
+        type: string
+        description: 事件ID，列表显示
+      eventName:
+        type: string
+        description: 事件名称
+      position:
+        type: string
+      occurTime:
+        type: string
+        format: date-time
+      eventTypeId:
+        type: string
+      eventTypeName:
+        type: string
+        description: 列表显示
+      eventGradeId:
+        type: string
+      eventGradeName:
+        type: string
+        description: 列表显示
+      sourceFlag:
+        type: string
+        description: 案例来源标识码（0：系统归档，1：系统录入）,列表显示
+      caseSource:
+        type: string
+      describes:
+        type: string
+      notes:
+        type: string
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+  CaseVo:
+    type: object
+    properties:
+      case:
+        $ref: '#/definitions/Case'
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 法规相关附件ID数组（上传的）
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+  CaseList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Case'
+####expert####
+  Expert:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      sex:
+        type: string
+        description: 0：女；1：男
+        enum:
+          - 0
+          - 1
+      birthday:
+        type: string
+        format: date
+      education:
+        type: string
+      unit:
+        type: string
+        description: 列表显示
+      post:
+        type: string
+      technicalTitle:
+        type: string
+      officeTel:
+        type: string
+      telephone:
+        type: string
+        description: 列表显示
+      email:
+        type: string
+      address:
+        type: string
+      eventTypeIds:
+        type: string
+        description: 事件类型IDS为用英文逗号连接的ID串
+      eventTypeNames:
+        type: string
+        description: 列表显示，事件类型NAMES为用英文逗号连接的事件类型名称串,新增时前端可不传该属性
+      specialty:
+        type: string
+        description: 列表显示
+      notes:
+        type: string
+      photoUrl:
+        type: string
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+  ExpertList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Expert'
+ ####team####
+  Team:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      propertyId:
+        type: string
+      propertyName:
+        type: string
+        description: 列表显示，新增时前端可不传该属性
+      teamTypeId:
+        type: string
+      teamTypeName:
+        type: string
+        description: 列表显示，新增时前端可不传该属性
+      unit:
+        type: string
+        description: 列表显示
+      dutyTel:
+        type: string
+        description: 列表显示
+      principal:
+        type: string
+      principalTel:
+        type: string
+      teamNum:
+        type: integer
+      lonAndLat:
+        type: string
+      address:
+        type: string
+        description: 列表显示
+      specialty:
+        type: string
+        description: 列表显示
+      constituted:
+        type: string
+      materials:
+        type: string
+      teamAbility:
+        type: string
+      teamCase:
+        type: string
+      notes:
+        type: string
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+  TeamForGis:
+    type: object
+    properties:
+      "properties ":
+        $ref: '#/definitions/Team'
+        description: 定义的名称为“properties”，其中 经纬度格式为[117.17672795872204,39.21503992227372]
+      type:
+        type: string
+        description: 默认值为“Feature”
+      geometry:
+        type: object
+        properties:
+          type:
+            type: string
+            description: 默认值为“Point”
+          coordinates:
+            type: array
+            description: 经纬度数组，格式为[117.17672795872204,39.21503992227372]
+            items:
+              type: number
+              description: 后台为double类型
+  TeamList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Team'
+  TeamListForGis:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/TeamForGis'
+ ####support####
+  Support:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      typeId:
+        type: string
+      typeName:
+        type: string
+        description: 列表显示，新增时前端可不传该属性
+      address:
+        type: string
+        description: 列表显示
+      lonAndLat:
+        type: string
+      principal:
+        type: string
+      principalTel:
+        type: string
+      supportSize:
+        type: string
+        description: 列表显示
+      capacity:
+        type: integer
+        description: 列表显示
+      describes:
+        type: string
+      notes:
+        type: string
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+  SupportForGis:
+    type: object
+    properties:
+      "properties ":
+        $ref: '#/definitions/Support'
+        description: 定义的名称为“properties”，其中 经纬度格式为[117.17672795872204,39.21503992227372]
+      type:
+        type: string
+        description: 默认值为“Feature”
+      geometry:
+        type: object
+        properties:
+          type:
+            type: string
+            description: 默认值为“Point”
+          coordinates:
+            type: array
+            description: 经纬度，格式为[117.17672795872204,39.21503992227372]
+            items:
+              type: number
+              description: 后台为double类型
+  SupportList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Support'
+  SupportListForGis:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/SupportForGis'
+ ####hazard####
+  Hazard:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      unit:
+        type: string
+        description: 列表显示
+      danTypeId:
+        type: string
+      danTypeName:
+        type: string
+        description: 列表显示
+      danGradeId:
+        type: string
+      danGradeName:
+        type: string
+        description: 列表显示
+      lonAndLat:
+        type: string
+      address:
+        type: string
+      criticalValue:
+        type: number
+        format: double
+      maxDanArea:
+        type: string
+      describes:
+        type: string
+      majorHazard:
+        type: string
+        description: 列表显示
+      disaster:
+        type: string
+      measure:
+        type: string
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+      reason:
+        type: string
+        description: 原因
+      suggest:
+        type: string
+        description: 应急处置建议
+      serialNum:
+        type: string
+        description: 编号
+      area:
+        type: string
+        description: 区域
+      riskName:
+        type: string
+        description: 风险名称
+  HazardForGis:
+    type: object
+    properties:
+      "properties ":
+        $ref: '#/definitions/Hazard'
+        description: 定义的名称为“properties”，其中 经纬度格式为[117.17672795872204,39.21503992227372]
+      type:
+        type: string
+        description: 默认值为“Feature”
+      geometry:
+        type: object
+        properties:
+          type:
+            type: string
+            description: 默认值为“Point”
+          coordinates:
+            type: array
+            description: 经纬度，格式为[117.17672795872204,39.21503992227372]
+            items:
+              type: number
+              description: 后台为double类型
+  HazardList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Hazard'
+  HazardListForGis:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/HazardForGis'
+ ####target####
+  Target:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      unit:
+        type: string
+        description: 列表显示
+      targetTypeId:
+        type: string
+      targetTypeName:
+        type: string
+        description: 列表显示
+      address:
+        type: string
+      lonAndLat:
+        type: string
+      principal:
+        type: string
+        description: 列表显示
+      principalTel:
+        type: string
+        description: 列表显示
+      describes:
+        type: string
+      disaster:
+        type: string
+      measure:
+        type: string
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+  TargetForGis:
+    type: object
+    properties:
+      "properties ":
+        $ref: '#/definitions/Target'
+        description: 定义的名称为“properties”，其中 经纬度格式为[117.17672795872204,39.21503992227372]
+      type:
+        type: string
+        description: 默认值为“Feature”
+      geometry:
+        type: object
+        properties:
+          type:
+            type: string
+            description: 默认值为“Point”
+          coordinates:
+            type: array
+            description: 经纬度，格式为[117.17672795872204,39.21503992227372]
+            items:
+              type: number
+              description: 后台为double类型
+  TargetList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Target'
+  TargetListForGis:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/TargetForGis'
+ ####material####
+  Material:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      code:
+        type: string
+      resTypeId:
+        type: string
+      resTypeName:
+        type: string
+        description: 列表显示
+      lonAndLat:
+        type: string
+      manufacturers:
+        type: string
+      vendorCountry:
+        type: string
+      specModel:
+        type: string
+        description: 列表显示
+      productTime:
+        type: string
+        format: date
+        description: 列表显示
+      expiratTime:
+        type: string
+        format: date
+        description: 列表显示
+      unitMeasure:
+        type: string
+        description: 列表显示
+      unit:
+        type: string
+      notes:
+        type: string
+      initialQuantity:
+        type: string
+        description: 列表显示
+      outsideQuantity:
+        type: string
+        description: 列表显示
+      remainingQuantity:
+        type: string
+        description: 列表显示
+      repertoryId:
+        type: string
+      repertoryName:
+        type: string
+        description: 列表显示
+      positionId:
+        type: string
+      positionName:
+        type: string
+        description: 列表显示
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+  MaterialForGis:
+    type: object
+    properties:
+      "properties ":
+        $ref: '#/definitions/Material'
+        description: 定义的名称为“properties”，其中 经纬度格式为[117.17672795872204,39.21503992227372]
+      type:
+        type: string
+        description: 默认值为“Feature”
+      geometry:
+        type: object
+        properties:
+          type:
+            type: string
+            description: 默认值为“Point”
+          coordinates:
+            type: array
+            description: 经纬度，格式为[117.17672795872204,39.21503992227372]
+            items:
+              type: number
+              description: 后台为double类型
+  MaterialList:
+      type: object
+      allOf:
+        - $ref: '#/definitions/ReturnResult'
+      properties:
+        data:
+          type: object
+          properties:
+            totalElements:
+              type: integer
+              description: 记录总数
+            totalPages:
+              type: integer
+              description: 总页数
+            first:
+              type: boolean
+              description: 是否第一页
+            last:
+              type: boolean
+              description: 是否最后一页
+            number:
+              type: integer
+              description: 当前页数，页码从0开始
+            size:
+              type: integer
+              description: 每页记录数
+            sort:
+              type: string
+            numberOfElements:
+              type: integer
+              description: 返回记录条数
+            content:
+              type: array
+              items:
+                $ref: '#/definitions/Material'
+  MaterialListForGis:
+      type: object
+      allOf:
+        - $ref: '#/definitions/ReturnResult'
+      properties:
+        data:
+          type: object
+          properties:
+            totalElements:
+              type: integer
+              description: 记录总数
+            totalPages:
+              type: integer
+              description: 总页数
+            first:
+              type: boolean
+              description: 是否第一页
+            last:
+              type: boolean
+              description: 是否最后一页
+            number:
+              type: integer
+              description: 当前页数，页码从0开始
+            size:
+              type: integer
+              description: 每页记录数
+            sort:
+              type: string
+            numberOfElements:
+              type: integer
+              description: 返回记录条数
+            content:
+              type: array
+              items:
+                $ref: '#/definitions/MaterialForGis'
+ ####repertory####
+  Repertory:
+    type: object
+    properties:
+      id:
+        type: string
+      unit:
+        type: string
+        description: 列表显示
+      code:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      repertoryAddress:
+        type: string
+        description: 列表显示
+      lonAndLat:
+        type: string
+      principalName:
+        type: string
+        description: 列表显示
+      principalTel:
+        type: string
+        description: 列表显示
+      creatOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+  RepertoryList:
+      type: object
+      allOf:
+        - $ref: '#/definitions/ReturnResult'
+      properties:
+        data:
+          type: object
+          properties:
+            totalElements:
+              type: integer
+              description: 记录总数
+            totalPages:
+              type: integer
+              description: 总页数
+            first:
+              type: boolean
+              description: 是否第一页
+            last:
+              type: boolean
+              description: 是否最后一页
+            number:
+              type: integer
+              description: 当前页数，页码从0开始
+            size:
+              type: integer
+              description: 每页记录数
+            sort:
+              type: string
+            numberOfElements:
+              type: integer
+              description: 返回记录条数
+            content:
+              type: array
+              items:
+                $ref: '#/definitions/Repertory'
+  RepertoryForGis:
+    type: object
+    properties:
+      "properties ":
+        $ref: '#/definitions/Repertory'
+        description: 定义的名称为“properties”，其中 经纬度格式为[117.17672795872204,39.21503992227372]
+      type:
+        type: string
+        description: 默认值为“Feature”
+      geometry:
+        type: object
+        properties:
+          type:
+            type: string
+            description: 默认值为“Point”
+          coordinates:
+            type: array
+            description: 经纬度，格式为[117.17672795872204,39.21503992227372]
+            items:
+              type: number
+              format: double
+              description: 后台为double类型
+ ####position####
+  Position:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      code:
+        type: string
+      seq:
+        type: string
+      repertoryId:
+        type: string
+      repertoryName:
+        type: string
+  ####Plan####
+  PlanCaltree:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id，列表显示
+      calName:
+        type: string
+        description: 目录名称，列表显示
+      parentId:
+        type: string
+      leaf:
+        type: string
+      orders:
+        type: integer
+      planNums:
+        type: integer
+        description: 预案数量
+  PlanCaltreeList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        allOf:
+          - $ref: '#/definitions/PlanCaltree'
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/PlanCaltree'
+  Plan:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      planTypeId:
+        type: string
+      planTypeName:
+        type: string
+        description: 列表显示
+      eventTypeId:
+        type: string
+      eventTypeName:
+        type: string
+        description: 列表显示
+      planStatusId:
+        type: string
+      planStatusName:
+        type: string
+        description: 列表显示
+      planDescri:
+        type: string
+      unit:
+        type: string
+        description: 列表显示
+      compileTime:
+        type: string
+        format: date
+        description: 列表显示
+      notes:
+        type: string
+      creatOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+      planCaltreeId:
+        type: string
+        description: 所属预案目录ID
+  PlanVo:
+    type: object
+    properties:
+      plan:
+        $ref: '#/definitions/Plan'
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 预案相关附件ID数组（上传的）
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+  PlanList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Plan'
+  ####planOrganization####
+  planOrg:
+    type: object
+    properties:
+      id:
+        type: string
+      planId:
+        type: string
+      eventGradeId:
+        type: string
+      eventGradeName:
+        type: string
+      name:
+        type: string
+      parentId:
+        type: string
+      orders:
+        type: string
+      leaf:
+        type: string
+      isMain:
+        type: string
+        description: 是否主责单位， 0否，1是
+  planOrgList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        allOf:
+          - $ref: '#/definitions/planOrg'
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/planOrg'
+
+  ####OrgResponsibility####
+  planOrgRespon:
+    type: object
+    properties:
+      id:
+        type: string
+      planOrgId:
+        type: string
+      planOrgName:
+        type: string
+      subjectType:
+        type: string
+        description: 列表显示,责任主体类型:0个人，1单位
+        enum:
+          - 0
+          - 1
+      duty:
+        type: string
+        description: 列表显示
+      responsibility:
+        type: string
+      details:
+        type: array
+        description: 每次更新就是删除后存最新的。
+        items:
+          $ref: '#/definitions/planOrgResponDetail'
+  planOrgResponDetail:
+    type: object
+    properties:
+      id:
+        type: string
+      orgResponId:
+        type: string
+      rspOrgId:
+        type: string
+      repOrgName:
+        type: string
+      principal:
+        type: string
+      principalTel:
+        type: string
+  ####planMaterial####
+  planMaterial:
+    type: object
+    properties:
+      id:
+        type: string
+      planID:
+        type: string
+      eventGradeId:
+        type: string
+      eventGradeName:
+        type: string
+      materialTypeId:
+        type: string
+      itemName:
+        type: string
+        description: 物资类型名称
+  ####planTask####
+  planTask:
+    type: object
+    properties:
+      id:
+        type: string
+      planID:
+        type: string
+      eventGradeId:
+        type: string
+      eventGradeName:
+        type: string
+      title:
+        type: string
+        description: 列表显示
+      content:
+        type: string
+        description: 列表显示
+      princiName:
+        type: string
+        description: 列表显示，负责人
+      princiTel:
+        type: string
+        description: 列表显示，负责人电话
+      princiOrgId:
+        type: string
+        description: 负责部门id
+      princiOrgName:
+        type: string
+        description: 列表显示，负责部门名称
+  planTaskList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/planTask'
+##### common model####
+  SearchBody:
+    type: object
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000 操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+#### parameters####
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string

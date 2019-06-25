@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.taiji.base.micro</groupId>
+    <artifactId>taiji-base-micro-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>base micro parent</name>
+    <description>base micro parent,all taiji base micro maven project parent</description>
+
+    <parent>
+        <groupId>com.taiji.micro</groupId>
+        <artifactId>micro-parent</artifactId>
+        <version>1.0.2</version>
+        <relativePath/>
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+
+        <mysql.jdbc.version>5.1.45</mysql.jdbc.version>
+    </properties>
+
+    <modules>
+        <module>base-platform-common</module>
+	
+	    <module>base-platform-msg/feign</module>
+        <module>base-platform-msg/micro</module>
+        <module>base-platform-msg/websocket-oauth2</module>
+
+        <module>emp-res/common</module>
+        <module>emp-res/feign</module>
+        <module>emp-res/micro</module>
+        <module>emp-res/web</module>
+
+        <module>emp-base/common</module>
+        <module>emp-base/feign</module>
+        <module>emp-base/micro</module>
+        <module>emp-base/web</module>
+
+        <module>emp-event/common</module>
+        <module>emp-event/feign</module>
+        <module>emp-event/micro</module>
+        <module>emp-event/web</module>
+
+        <module>emp-duty/common</module>
+        <module>emp-duty/feign</module>
+        <module>emp-duty/micro</module>
+        <module>emp-duty/web</module>
+
+        <module>emp-drill/feign</module>
+        <module>emp-drill/web</module>
+        <module>emp-drill/common</module>
+        <module>emp-drill/micro</module>
+
+        <module>emp-nangang/common</module>
+        <module>emp-nangang/feign</module>
+        <module>emp-nangang/micro</module>
+        <module>emp-nangang/web</module>
+        <module>emp-nangang/task</module>
+
+        <module>emp-alarm/common</module>
+        <module>emp-alarm/feign</module>
+        <module>emp-alarm/micro</module>
+        <module>emp-alarm/web</module>
+
+        <module>emp-zn/common</module>
+        <module>emp-zn/feign</module>
+        <module>emp-zn/micro</module>
+        <module>emp-zn/web</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.taiji.micro</groupId>
+                <artifactId>micro-parent</artifactId>
+                <version>1.0.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.base.common</groupId>
+                <artifactId>base-platform-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.base.sample</groupId>
+                <artifactId>base-sample-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.base.sample</groupId>
+                <artifactId>base-sample-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.base.sys</groupId>
+                <artifactId>base-sys-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.base.sys</groupId>
+                <artifactId>base-sys-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+	    
+	    <dependency>
+                <groupId>com.taiji.base.msg</groupId>
+                <artifactId>base-msg-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.res</groupId>
+                <artifactId>emp-res-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.res</groupId>
+                <artifactId>emp-res-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.base</groupId>
+                <artifactId>emp-base-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.base</groupId>
+                <artifactId>emp-base-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.duty</groupId>
+                <artifactId>emp-duty-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.duty</groupId>
+                <artifactId>emp-duty-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.drill</groupId>
+                <artifactId>emp-drill-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.drill</groupId>
+                <artifactId>emp-drill-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.event</groupId>
+                <artifactId>emp-event-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.event</groupId>
+                <artifactId>emp-event-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.nangang</groupId>
+                <artifactId>emp-nangang-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.nangang</groupId>
+                <artifactId>emp-nangang-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.alarm</groupId>
+                <artifactId>emp-alarm-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.taiji.emp.alarm</groupId>
+                <artifactId>emp-alarm-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.zn</groupId>
+                <artifactId>emp-zn-common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.taiji.emp.zn</groupId>
+                <artifactId>emp-zn-feign</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.jdbc.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>local_nexus</id>
+            <name>local_nexus</name>
+            <url>http://192.168.57.101:8081/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+	
+	<distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Releases name</name>
+            <url>http://192.168.57.101:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>snapshots name</name>
+            <url>http://192.168.57.101:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+	
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>config/**</exclude>
+                </excludes>
+                <includes>
+                    <include>static/**</include>
+                    <include>templates/**</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources/config</directory>
+                <targetPath>config</targetPath>
+                <filtering>true</filtering>
+                <includes>
+                    <include>application-${profiles.active}.properties</include>
+                    <include>application.properties</include>
+                    <include>banner.txt</include>
+                    <include>bootstrap.properties</include>
+                    <include>logback-spring.xml</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
+    <profiles>
+        <profile>
+            <!-- 公司开发环境 -->
+            <id>dev</id>
+            <properties>
+                <profiles.active>dev</profiles.active>
+                <eureka.instance.ip-address>192.168.57.170</eureka.instance.ip-address>
+                <oauth2.instance.ip-address>192.168.57.170</oauth2.instance.ip-address>
+                <eureka.security.username>eureka-user</eureka.security.username>
+                <eureka.security.password>eureka-password</eureka.security.password>
+                <feign.security.username>feign-user</feign.security.username>
+                <feign.security.password>feign-password</feign.security.password>
+                <log.file.directory>log/</log.file.directory>
+                <!-- sql大小写标志位，0 : 利用SqlFormat转化原生sql为大写； 1 : 利用SqlFormat转化原生sql为小写；2:不对sql进行大小写操作-->
+                <sqlFormat>2</sqlFormat>
+            </properties>
+            
+        </profile>
+        <profile>
+            <!-- 本地开发环境 -->
+            <id>local</id>
+            <properties>
+                <profiles.active>local</profiles.active>
+                <eureka.instance.ip-address>127.0.0.1</eureka.instance.ip-address>
+                <oauth2.instance.ip-address>127.0.0.1</oauth2.instance.ip-address>
+                <eureka.security.username>eureka-user</eureka.security.username>
+                <eureka.security.password>eureka-password</eureka.security.password>
+                <feign.security.username>feign-user</feign.security.username>
+                <feign.security.password>feign-password</feign.security.password>
+                <log.file.directory>d:/log/</log.file.directory>
+                <!-- sql大小写标志位，0 : 利用SqlFormat转化原生sql为大写； 1 : 利用SqlFormat转化原生sql为小写；2:不对sql进行大小写操作-->
+                <sqlFormat>2</sqlFormat>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <!-- 测试环境 -->
+            <id>test</id>
+            <properties>
+                <profiles.active>test</profiles.active>
+                <eureka.instance.ip-address>127.0.0.1</eureka.instance.ip-address>
+                <oauth2.instance.ip-address>127.0.0.1</oauth2.instance.ip-address>
+                <eureka.security.username>eureka-user</eureka.security.username>
+                <eureka.security.password>eureka-password</eureka.security.password>
+                <feign.security.username>feign-user</feign.security.username>
+                <feign.security.password>feign-password</feign.security.password>
+                <log.file.directory>d:/log/</log.file.directory>
+                <!-- sql大小写标志位，0 : 利用SqlFormat转化原生sql为大写； 1 : 利用SqlFormat转化原生sql为小写；2:不对sql进行大小写操作-->
+                <sqlFormat>2</sqlFormat>
+            </properties>
+        </profile>
+        <profile>
+            <!-- 生产环境 -->
+            <id>prod</id>
+            <properties>
+                <profiles.active>prod</profiles.active>
+                <eureka.instance.ip-address>127.0.0.1</eureka.instance.ip-address>
+                <oauth2.instance.ip-address>127.0.0.1</oauth2.instance.ip-address>
+                <eureka.security.username>eureka-user</eureka.security.username>
+                <eureka.security.password>eureka-password</eureka.security.password>
+                <feign.security.username>feign-user</feign.security.username>
+                <feign.security.password>feign-password</feign.security.password>
+                <log.file.directory>d:/log/</log.file.directory>
+                <!-- sql大小写标志位，0 : 利用SqlFormat转化原生sql为大写； 1 : 利用SqlFormat转化原生sql为小写；2:不对sql进行大小写操作-->
+                <sqlFormat>2</sqlFormat>
+            </properties>
+        </profile>
+    </profiles>
+</project>

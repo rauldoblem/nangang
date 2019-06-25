@@ -1,0 +1,691 @@
+swagger: '2.0'
+info:
+  description: >-
+    包括预警信息主题、资源分布主题、事件接警主题、事件处置主题.
+  version: 1.0.0
+  title: csyj城市应急
+host: 127.0.0.1:8000
+basePath: /csyj/v1
+tags:
+  - name: 预警信息主题alert
+    description: 预警信息时间轴、预警详情展示、预警发布信息统计、预警发布类型TOP10
+  - name: 资源分布主题resource
+    description: 重大危险源统计、重点防护目标统计、应急专家统计、应急队伍统计、应急物资统计、应急避难场所统计、常住人口统计等
+  - name: 事件接警主题accept
+    description: 各区事件接报统计、各区处置情况对比、某区历年处置情况对比、高发事件类型TOP10
+  - name: 事件处置主题cmd
+    description: 事件信息、分析研判、处置方案、处置跟踪等。
+
+schemes:
+  - http
+paths:
+####预警信息模式####
+ /alerts/stat:
+    post:
+      tags:
+        - 预警信息主题alert
+      summary: '按照事件类型一级分类(四大类)统计预警发布数量'
+      operationId: statAlert
+      parameters:
+          - name: alertVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                statWay:
+                  type: string
+                  description: 统计时间方式：0按周，1按月，2按年
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/AlertStatVo'
+ /alerts/eventTypeTop:
+    post:
+      tags:
+        - 预警信息主题alert
+      summary: '统计预警高发类型TOP'
+      operationId: statAlertTypeTop
+      parameters:
+          - name: alertVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                statYear:
+                  type: integer
+                  description: 统计年份，格式为yyyy
+                topNum:
+                  type: integer
+                  description: TOP位数
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/AlertTypeTopVo'
+ /alerts/searchAll:
+    post:
+      tags:
+        - 预警信息主题alert
+      summary: '根据条件查询预警信息列表-不分页'
+      operationId: findAlerts
+      parameters:
+        - name: alertVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              topNum:
+                type: integer
+                description: TOP位数
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Alert'
+ /alerts/{id}:
+    get:
+      tags:
+        - 预警信息主题alert
+      summary: '获取单条预警信息'
+      operationId: findAlertById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Alert'
+####资源分布模式####
+ /resources/statHazards:
+    post:
+      tags:
+        - 资源分布主题resource
+      summary: '统计各区不同级别的重大风险源数量'
+      operationId: statHazards
+      parameters:
+          - name: hazardVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                orgCodes:
+                  type: array
+                  items:
+                    type: string
+                    description: 统计各区单位编码数组
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/HazardStatVo'
+ /resources/statTargets:
+    post:
+      tags:
+        - 资源分布主题resource
+      summary: '统计重点防护目标各大类数量'
+      operationId: statTargets
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/TargetStatVo'
+ /resources/statExperts:
+    post:
+      tags:
+        - 资源分布主题resource
+      summary: '统计应急专家各大类数量'
+      operationId: statExperts
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/ExpertStatVo'
+ /resources/statTeams:
+    post:
+      tags:
+        - 资源分布主题resource
+      summary: '统计应急队伍各大类数量'
+      operationId: statTeams
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/TeamStatVo'
+ /resources/statMaterials:
+    post:
+      tags:
+        - 资源分布主题resource
+      summary: '统计各区的应急物资各大类数量'
+      operationId: statMaterials
+      parameters:
+          - name: materialVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                orgCodes:
+                  type: array
+                  items:
+                    type: string
+                    description: 统计各区单位编码数组
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/MaterialStatVo'
+ /resources/statSupports:
+    post:
+      tags:
+        - 资源分布主题resource
+      summary: '统计各区的社会依托资源（应急避难场所）数量'
+      operationId: statSupports
+      parameters:
+          - name: supportVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                orgCodes:
+                  type: array
+                  items:
+                    type: string
+                    description: 统计各区单位编码数组
+                suppTypeId:
+                  type: string
+                  description: 分类中应急避难场所ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/SupportStatVo'
+ /resources/statPopulations:
+    post:
+      tags:
+        - 资源分布主题resource
+      summary: '统计各区的常住人口分布情况'
+      operationId: statPopulations
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/PopulationStatVo'
+####事件接警模式####
+ /accepts/stat:
+    post:
+      tags:
+        - 事件接警主题accept
+      summary: '按年统计各区的接报总数和处置总数'
+      operationId: statAcceptInfo
+      parameters:
+          - name: acceptVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                statYears:
+                  type: array
+                  items:
+                    type: integer
+                    description: 统计年份数组，格式为yyyy
+                orgCodes:
+                  type: array
+                  items:
+                    type: string
+                    description: 统计各区单位编码数组
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/AcceptStatVo'
+ /accepts/eventTypeTop:
+    post:
+      tags:
+        - 事件接警主题accept
+      summary: '统计事件高发类型TOP'
+      operationId: statEventTypeTop
+      parameters:
+          - name: acceptVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                statYear:
+                  type: integer
+                  description: 统计年份，格式为yyyy
+                topNum:
+                  type: integer
+                  description: TOP位数
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EventTypeTopVo'
+ /accepts/searchAll:
+    post:
+      tags:
+        - 事件接警主题accept
+      summary: '根据条件查询接报信息列表-不分页'
+      operationId: findAcceptInfos
+      parameters:
+        - name: acceptVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              statYear:
+                type: integer
+                description: 统计年份，格式为yyyy
+              orgCode:
+                type: string
+                description: 统计各区单位编码
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/IMAccept'
+ /accepts/{id}:
+    get:
+      tags:
+        - 事件接警主题accept
+      summary: '获取单条上报、接报信息'
+      operationId: findInfoReportById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/IMAccept'
+
+####事件处置模式###
+#同综合应急处置界面，样式调整下即可，暂不新增接口。
+
+################ definitions#################
+definitions:
+####预警信息alert####
+ Alert:
+   type: object
+   properties:
+     id:
+       type: string
+     headline:
+       type: string
+     msgtype:
+       type: string
+     eventTypeId:
+       type: string
+     eventTypeName:
+       type: string
+     severityId:
+       type: string
+     severityName:
+       type: string
+     description:
+       type: string
+     instruction:
+       type:  string
+     areaDesc:
+       type: string
+     geoCode:
+       type: string
+     sendTime:
+       type: string
+       format: date-time
+     effective:
+       type: string
+       format: date-time
+     note:
+       type: string
+     sender:
+       type: string
+ AlertStatVo:
+   type: object
+   properties:
+     statTime:
+       type: string
+       description: 统计时间
+     eventTypeId:
+       type: string
+       description: 预警事件大类ID
+     eventTypeName:
+       type: string
+       description: 预警事件大类名称
+     publishTotalNum:
+       type: integer
+       description: 预警发布数量
+ AlertTypeTopVo:
+   type: object
+   properties:
+     eventTypeName:
+       type: string
+       description: 预警高发事件类型名称
+     totalNum:
+       type: integer
+       description: 高发数量
+
+####应急资源resource####
+ HazardStatVo:
+   type: object
+   properties:
+     orgCode:
+       type: string
+       description: 单位编码
+     orgName:
+       type: string
+       description: 单位名称
+     danGradeId:
+       type: string
+       description: 危险源级别ID
+     danGradeName:
+       type: string
+       description: 危险源级别名称
+     totalNum:
+       type: integer
+       description: 重大危险源总数量
+ TargetStatVo:
+   type: object
+   properties:
+     targetTypeId:
+       type: string
+       description: 防护目标类型大类ID
+     targetTypeName:
+       type: string
+       description: 防护目标类型大类名称
+     totalNum:
+       type: integer
+       description: 防护目标总数量
+ ExpertStatVo:
+   type: object
+   properties:
+     eventTypeId:
+       type: string
+       description: 事件类型大类ID
+     eventTypeName:
+       type: string
+       description: 事件类型大类名称
+     totalNum:
+       type: integer
+       description: 应急专家总数量
+ TeamStatVo:
+   type: object
+   properties:
+     teamTypeId:
+       type: string
+       description: 队伍类型大类ID
+     teamTypeName:
+       type: string
+       description: 队伍类型大类名称
+     totalNum:
+       type: integer
+       description: 应急队伍总数量
+ MaterialStatVo:
+   type: object
+   properties:
+     orgCode:
+       type: string
+       description: 单位编码
+     orgName:
+       type: string
+       description: 单位名称
+     resTypeId:
+       type: string
+       description: 物资类型大类ID
+     resTypeName:
+       type: string
+       description: 物资类型大类名称
+     totalNum:
+       type: integer
+       description: 物资总数量
+ SupportStatVo:
+   type: object
+   properties:
+     orgCode:
+       type: string
+       description: 单位编码
+     orgName:
+       type: string
+       description: 单位名称
+     suppTypeId:
+       type: string
+       description: 依托资源类型大类ID
+     suppTypeName:
+       type: string
+       description: 依托资源类型大类名称
+     totalNum:
+       type: integer
+       description: 社会依托资源总数量
+ PopulationStatVo:
+   type: object
+   properties:
+     orgCode:
+       type: string
+       description: 单位编码
+     orgName:
+       type: string
+       description: 单位名称
+     totalPopulation:
+       type: integer
+       description: 常住人口数量
+     populationDensity:
+       type: integer
+       description: 常住人口密度
+
+####事件接警inforeport####
+ IMAccept:
+   type: object
+   properties:
+     id:
+       type: string
+     eventName:
+       type: string
+     position:
+       type: string
+     lonAndLat:
+       type: string
+     occurTime:
+       type: string
+     eventTypeId:
+       type: string
+     eventTypeName:
+       type: string
+     eventGradeId:
+       type: string
+     eventGradeName:
+       type: string
+     reportOrgId:
+       type: string
+     reportOrgName:
+       type: string
+     reporter:
+       type: string
+     reporterTel:
+       type: string
+     methodId:
+       type: string
+     methodName:
+       type: string
+     reportTime:
+       type: string
+       format: date-time
+     eventCause:
+       type: string
+     eventDesc:
+       type: string
+     protreatment:
+       type: string
+     deathNum:
+       type: integer
+     wondedNum:
+       type: integer
+     request:
+       type: string
+     createOrgId:
+       type: string
+       description: 创建单位ID
+ AcceptStatVo:
+   type: object
+   properties:
+     orgCode:
+       type: string
+       description: 单位编码
+     orgName:
+       type: string
+       description: 单位名称
+     statYear:
+       type: integer
+       description: 统计年份
+     acceptTotalNum:
+       type: integer
+       description: 接报数量
+     handelTotalNum:
+       type: integer
+       description: 处置数量
+ EventTypeTopVo:
+   type: object
+   properties:
+     eventTypeName:
+       type: string
+       description: 高发事件类型名称
+     totalNum:
+       type: integer
+       description: 高发数量
+
+####事件处置cmd####
+#同综合应急处置界面，样式调整下即可，暂不新增接口定义。
+
+##### common model####
+ ReturnResult:
+   type: object
+   properties:
+     code:
+       type: integer
+       description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+     msg:
+       type: string
+
+############################ parameters#####################
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string

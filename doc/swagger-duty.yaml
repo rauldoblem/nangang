@@ -1,0 +1,2093 @@
+swagger: '2.0'
+info:
+  description: >-
+    值班排班、值班日志、交接班等.
+  version: 1.0.0
+  title: duty应急值守
+host: 127.0.0.1:8000
+basePath: /emp-duty/v1
+tags:
+  - name: 值班排班->人员维护person
+    description: 值班人员分组的维护及值班人员的维护
+  - name: 值班排班->日历设置calensetting
+    description: 日历设置，设置一天为工作日、双休日、法定节假日、特殊节假日、其他等类型
+  - name: 值班排班->模式设置patternsetting
+    description: 值班模式设置，设置工作日、双休日、法定节假日、特殊节假日、其他等班次信息及值班人员类型
+  - name: 值班排班->排班scheduling
+    description: 值班排班，设置某月的值班人员
+  - name: 值班排班->值班统计dutystatistic
+    description: 值班统计，对某段时间内的人员值班情况进行统计
+  - name: 值班日志dailylog
+    description: 值班日志信息管理
+  - name: 交接班dailyshift
+    description: 值班交接班管理
+
+schemes:
+  - http
+paths:
+####人员维护####
+  /dutyteams:
+    post:
+      tags:
+       - '值班排班->人员维护person'
+      summary: '新增值班人员分组'
+      operationId: addDutyteam
+      parameters:
+       - name: dutyteam
+         in: body
+         required: true
+         schema:
+          $ref: '#/definitions/Dutyteam'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /dutyteams/{id}:
+    get:
+      tags:
+        - '值班排班->人员维护person'
+      summary: 获取单个值班人员分组信息
+      operationId: findDutyteamById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description:  OK
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Dutyteam'
+    put:
+      tags:
+        - '值班排班->人员维护person'
+      summary: '修改值班人员分组信息'
+      operationId: updateDutyteam
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: dutyteam
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Dutyteam'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    delete:
+      tags:
+        - '值班排班->人员维护person'
+      summary: '删除值班人员分组'
+      operationId: deleteDutyteam
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /dutyteams/searchAll:
+    post:
+      tags:
+        - '值班排班->人员维护person'
+      summary: '查询值班人员分组列表-不分页，默认情况下查询本单位的分组列表'
+      parameters:
+        - name: orgId
+          type: string
+          in: query
+          required: true
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Dutyteam'
+  /persons:
+    post:
+      tags:
+        - '值班排班->人员维护person'
+      summary: '新增值班人员'
+      operationId: addDutypersons
+      parameters:
+        - name: dutypersons
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              dutyTeamId:
+                type: string
+              addrIds:
+                type: array
+                items:
+                  type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /persons/{id}:
+    get:
+      tags:
+        - '值班排班->人员维护person'
+      summary: 获取单个值班人员信息
+      operationId: findDutypersonById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description:  OK
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Person'
+    put:
+      tags:
+        - '值班排班->人员维护person'
+      summary: '修改值班人员信息'
+      operationId: updateDutyperson
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: dutyperson
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Person'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /persons/deletePersons:
+    delete:
+      tags:
+        - '值班排班->人员维护person'
+      summary: '删除值班人员'
+      operationId: deleteDutypersons
+      parameters:
+        - name: dutypersons
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              personIds:
+                type: array
+                items:
+                  type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /persons/search:
+    post:
+      tags:
+        - '值班排班->人员维护person'
+      summary: '根据条件查询人员列表-分页，默认情况下展示该单位设置所有分组下的全部值班人员'
+      operationId: findDutypersons
+      parameters:
+        - name: dutypersonVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              orgIds:
+                type: array
+                description: 所属单位IDs
+                items:
+                  type: string
+              name:
+                type: string
+              mobile:
+                type: string
+              teamIds:
+                type: array
+                description: 所属值班人员分组IDs
+                items:
+                  type: string
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/PersonList'
+  /persons/searchAll:
+    post:
+      tags:
+        - '值班排班->人员维护person'
+      summary: '根据条件查询值班人员列表-不分页'
+      operationId: findDutypersonsAll
+      parameters:
+        - name: dutypersonVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              orgIds:
+                type: array
+                description: 所属单位IDs
+                items:
+                  type: string
+              name:
+                type: string
+              mobile:
+                type: string
+              teamIds:
+                type: array
+                description: 所属值班人员分组IDs
+                items:
+                  type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Person'
+####日历设置####
+  /calensettings/searchAll:
+    post:
+      tags:
+        - '值班排班->日历设置calensetting'
+      summary: 获取日历设置,后台须判断该月是否有日历设置并返回前端，若无，则须装载一个默认的日历（只按照工作日和双休日），若有且已排班，则前端不可修改日历，若有但无排班，则前端可修改日历，后台注意，需根据日历控件的展示形式，把本月的首天前和末天后的空缺周天补齐
+      operationId: getCalenSettingList
+      parameters:
+        - name: dateSearchVO
+          in: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/DateSearchVO'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/CalenSettings'
+  /calensettings/saveCalen:
+    post:
+      tags:
+        - '值班排班->日历设置calensetting'
+      summary: 保存日历设置
+      operationId: saveCalenSettingList
+      parameters:
+        - name: calenSetting
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              orgId:
+                 type: string
+              dates:
+                 type: array
+                 items:
+                   $ref: '#/definitions/CalenSetting'
+      responses:
+        200:
+          description: OK
+          schema:
+              $ref: '#/definitions/ReturnResult'
+
+####模式设置####
+  /patternsettings/searchPatterns:
+    get:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary:  获取模式设置,后台须判断该单位是否有模式设置并返回前端，若无，则须装载一个默认的模式并返回
+      operationId: getPatternList
+      parameters:
+        - name: orgId
+          type: string
+          in: query
+          required: true
+          description: 所属单位ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/PatternSetting'
+  /patternsettings/searchShiftPatterns:
+    get:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: 根据模式ID获取班次设置列表-不分页
+      operationId: getShiftPatterns
+      parameters:
+        - name: patterId
+          type: string
+          in: query
+          required: true
+          description: 模式ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/ShiftPattern'
+  /patternsettings/currentShiftName:
+    get:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: 根据当前时间获取班次名称，供交接班使用
+      operationId: getCurrentShiftName
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: string
+                description: 当前时间对应的班次名称，如“2018年11月7日早班”
+  /patternsettings/shiftPatterns:
+    post:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: 新增单个班次信息
+      operationId: addShiftPattern
+      parameters:
+        - name: shiftPattern
+          in: body
+          required: true
+          schema:
+           $ref: '#/definitions/ShiftPattern'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /patternsettings/shiftPatterns/{id}:
+    get:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: '获取单个值班班次信息'
+      operationId: findShiftPatternById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description:  OK
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/ShiftPattern'
+    put:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: '修改单个值班班次信息'
+      operationId: updateShiftPattern
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: shiftPattern
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ShiftPattern'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    delete:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: '删除单个值班班次信息'
+      operationId: deleteShiftPattern
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /patternsettings/searchPtypePatterns:
+    get:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: '根据模式ID查询值班人员设置列表-不分页'
+      operationId: getPersontypePatterns
+      parameters:
+        - name: patternId
+          in: query
+          type: string
+          required: true
+          description: 值班模式ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/PersontypePattern'
+  /patternsettings/ptypePatterns:
+    post:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: '新增单个值班人员设置信息'
+      operationId: addPersontypePattern
+      parameters:
+        - name: persontypePattern
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/PersontypePattern'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /patternsettings/ptypePatterns/{id}:
+    get:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: '获取单个值班人员设置信息'
+      operationId: findPersontypePatternById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description:  OK
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/PersontypePattern'
+    put:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: '修改单个值班人员设置信息'
+      operationId: updatePersontypePattern
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: persontypePattern
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/PersontypePattern'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    delete:
+      tags:
+        - '值班排班->模式设置patternsetting'
+      summary: '删除单个值班人员设置信息'
+      operationId: deletePersontypePattern
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+####值班排班####
+  /schedulings/getCalSchedulings:
+    post:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: 获取日历值班排班数据,若不选择单位，则默认获取本单位的情况。后台须判断该单位是否有排班并返回前端，若无，则须先给每一天加载值班班次信息，前端可进行自动排班，若有，则不可自动排班。后台注意，若为日历格式，需根据日历控件的展示形式，把本月的首天前和末天后的空缺周天补齐
+      operationId: getCalSchedulings
+      parameters:
+        - name: searchVO
+          in: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/PersonSearchVO'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: object
+                $ref: '#/definitions/MonthScheduling'
+  /schedulings/getListSchedulings:
+    post:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: 获取列表值班排班数据,若不选择单位，则默认获取本单位的情况。后台须判断该单位是否有排班并返回前端，若无，则须先给每一天加载值班班次信息
+      operationId: getListSchedulings
+      parameters:
+        - name: searchVO
+          in: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/PersonSearchVO'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/ListScheduling'
+  /schedulings/getAutoSchedulings:
+    post:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: 获取自动班排班数据。若不选择单位，则默认获取本单位的情况。后台须根据值班模式设置编写自动排班(每个班次排一个人员，按照组内排序依次排)算法，且返回时注意，展示为日历格式，需根据日历控件的展示形式，把本月的首天前和末天后的空缺周天补齐
+      operationId: getAutoSchedulings
+      parameters:
+        - name: searchVO
+          in: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/DateSearchVO'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+  /schedulings/findSchedulingsById:
+    post:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: '获取单个班次的值班人员列表'
+      operationId: findSchedulingsById
+      parameters:
+        - name: patternSearchVO
+          in: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/PatternSearchVO'
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/SchedulingSingle'
+  /schedulings/saveSchedulings:
+    post:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: '保存单个班次的值班人员列表，前端在修改时只可修改值班人员，后台在保存时先删除原值班人员列表，再保存新的列表'
+      operationId: saveSchedulings
+      parameters:
+        - name: schedulings
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/SchedulingSingle'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /schedulings/exchangeScheduling:
+    post:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: '保存单个班次的值班人员的换班，前端在修改时注意若hisPersonId为空，将personId内容放入hisPersonId，新选的值班人Id放在personId，若hisPersonId不为空，新选的值班人Id直接放在personId'
+      operationId: exchangeScheduling
+      parameters:
+        - name: scheduling
+          in: body
+          required: true
+          schema:
+            type: object
+            $ref: '#/definitions/SchedulingSingle'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /schedulings/currentDutys:
+    get:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: '获取当天参与交接班的值班人员列表，供交接班选择交班人员调用'
+      operationId: getCurrentDutypersons
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/PerSchelVO'
+  /schedulings/nextDutys:
+    get:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: '获取当天与下一天参与交接班的值班人员列表，供交接班选择接班人员调用'
+      operationId: getNextDutypersons
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/PerSchelVO'
+  /schedulings/currentPatterns:
+    get:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: '根据当前系统时间获取对应班次的值班人员列表，包括领导和值班员等，供南港的值班工作桌面调用'
+      operationId: getCurrentPatternpersons
+      parameters:
+        - name: shiftFlag
+          in: query
+          required: true
+          type: string
+          description: 班次标准，0当前班次，1上一班次，2下一班次
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/PerPatternVO'
+  /schedulings/getDutysByDate:
+    get:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: '【2018-12-11移动端新加】根据日期获取当天的所有值班人员列表，包括领导和值班员等，供南港的移动APP'
+      operationId: getDutysByDate
+      parameters:
+        - name: searchDate
+          in: query
+          required: true
+          type: string
+          format: date
+          description: 日期，格式如“2018-12-11”
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                  $ref: '#/definitions/CalScheduling'
+  /schedulings/getAllDutysByDate:
+    post:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: '【2018-12-22新加】根据日期获取当天的集团及各板块的值班人员列表，包括领导和值班员等，供浙能首页使用'
+      operationId: getAllDutysByDate
+      parameters:
+        - name: searchAllDutyVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              searchDate:
+                type: string
+                format: date
+                description: 日期，格式如“2018-12-11”
+              orgIds:
+                type: array
+                items:
+                  type: string
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    orgId:
+                      type: string
+                    orgName:
+                      type: string
+                    dutyManList:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          dutyName:
+                            type: string
+                          dutyTel:
+                            type: string
+  /schedulings/listSchedulingsToExcel:
+    post:
+      tags:
+        - '值班排班->排班scheduling'
+      summary: 根据查询条件导出值班列表Excel
+      operationId: listSchedulingsToExcel
+      parameters:
+        - name: searchVO
+          in: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/PersonSearchVO'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+####值班统计####
+  /dutystatistics/search:
+    post:
+      tags:
+        - '值班排班->值班统计dutystatistic'
+      summary: 获取值班统计数据。自动统计本单位的值班情况
+      operationId: getDutyStatistics
+      parameters:
+        - name: searchVO
+          in: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/DutyStaSearchVO'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/DutyStatistics'
+  /dutystatistics/exportToExcel:
+    post:
+      tags:
+        - '值班排班->值班统计dutystatistic'
+      summary: 根据查询条件导出值班统计列表Excel
+      operationId: exportToExcel
+      produces:
+       - 'application/octet-stream'
+      parameters:
+        - name: searchVO
+          in: body
+          required: true
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/DutyStaSearchVO'
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+#### dailylogs ####
+  /dailylogs:
+    post:
+      tags:
+        - 值班日志dailylog
+      summary: '新增值班日志'
+      operationId: addDailyLog
+      parameters:
+        - name: dailyLog
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DailyLog'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /dailylogs/{id}:
+      get:
+        tags:
+          - 值班日志dailylog
+        summary: 获取单条值班日志信息
+        operationId: findDailyLogById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/DailyLog'
+      put:
+        tags:
+          - 值班日志dailylog
+        summary: '修改值班日志信息'
+        operationId: updateDailyLog
+        parameters:
+          - $ref: '#/parameters/id-p'
+          - name: dailyLog
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/DailyLog'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+      delete:
+        tags:
+          - 值班日志dailylog
+        summary: '删除值班日志'
+        operationId: deleteDailyLog
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+  /dailylogs/search:
+      post:
+        tags:
+          - 值班日志dailylog
+        summary: '根据条件查询值班日志列表-分页'
+        operationId: findDailyLogs
+        parameters:
+          - name: dailyLogVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                affirtTypeIds:
+                  type: array
+                  items:
+                    type: string
+                  description: 日志类别Ids,可选多个
+                inputerName:
+                  type: string
+                  description: 记录人
+                treatStatuses:
+                  type: array
+                  items:
+                     type: string
+                  description: 办理状态，可选多个
+                orgId:
+                  type: string
+                  description: 所属部门ID
+              allOf:
+                - $ref: '#/definitions/SearchBody'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/DailyLogList'
+  /dailylogs/searchAll:
+      post:
+        tags:
+          - 值班日志dailylog
+        summary: '根据条件查询值班日志列表-不分页'
+        operationId: findDailyLogsAll
+        parameters:
+          - name: dailyLogVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                isLastlyFlag:
+                 type: string
+                 description: 是否只查询今天和昨天的日志列表，0否，1是，用于日志首页
+                affirtTypeIds:
+                  type: array
+                  items:
+                    type: string
+                  description: 日志类别Ids,可选多个
+                inputerName:
+                  type: string
+                  description: 记录人
+                treatStatuses:
+                  type: array
+                  items:
+                    type: string
+                  description: 办理状态，可选多个
+                orgId:
+                  type: string
+                  description: 所属部门ID
+        responses:
+          200:
+            description: OK
+            schema:
+              type: object
+              allOf:
+               - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/DailyLogVo'
+  /dailylogs/todayAndYesterday:
+      post:
+        tags:
+          - 值班日志dailylog
+        summary: '根据条件查询今天和昨天的值班日志列表-不分页'
+        operationId: findDailyLogsToday
+        parameters:
+          - name: dailyLogVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                isLastlyFlag:
+                  type: string
+                  description: 是否只查询今天和昨天的日志列表，1是，用于日志首页
+                affirtTypeIds:
+                  type: array
+                  items:
+                    type: string
+                  description: 日志类别Ids,可选多个
+                inputerName:
+                  type: string
+                  description: 记录人
+                treatStatuses:
+                  type: array
+                  items:
+                    type: string
+                  description: 办理状态，可选多个
+                orgId:
+                  type: string
+                  description: 所属部门ID
+        responses:
+          200:
+            description: OK
+            schema:
+              type: object
+              allOf:
+               - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  type: object
+                  properties:
+                    today:
+                      type: array
+                      items:
+                        $ref: '#/definitions/DailyLogVo'
+                    yesterday:
+                      type: array
+                      items:
+                        $ref: '#/definitions/DailyLogVo'
+
+  /dailylogs/dlogTreat:
+    post:
+      tags:
+        - 值班日志dailylog
+      summary: 记录值班日志办理情况，并更新值班日志主表办理状态
+      operationId: dailyLogTreat
+      parameters:
+        - name: dailyLogTreatment
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DailyLogTreatment'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /dailylogs/dlogTreats/{dlogId}/:
+    get:
+      tags:
+        - 值班日志dailylog
+      summary: 根据值班日志ID获取办理状态列表
+      operationId: getLogTreatsByLogId
+      parameters:
+        - name: dlogId
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          schema:
+               type: object
+               allOf:
+                - $ref: '#/definitions/ReturnResult'
+               properties:
+                 data:
+                   type: array
+                   items:
+                     $ref: '#/definitions/DailyLogTreatment'
+#### dailyshifts ####
+  /dailyshifts:
+    post:
+      tags:
+        - 交接班dailyshift
+      summary: '新增交接班'
+      operationId: addDailyShift
+      parameters:
+        - name: dailyShift
+          in: body
+          required: true
+          schema:
+            properties:
+              dailyShift:
+                 $ref: '#/definitions/DailyShift'
+              logIds:
+                 type: array
+                 description: 选择的值班日志IDs
+                 items:
+                   type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /dailyshifts/{id}:
+      get:
+        tags:
+          - 交接班dailyshift
+        summary: 获取单条交接班信息
+        operationId: findDailyShiftById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/DailyShiftVO'
+  /dailyshifts/search:
+      post:
+        tags:
+          - 交接班dailyshift
+        summary: '根据条件查询交接班信息列表-分页'
+        operationId: findDailyShifts
+        parameters:
+          - name: dailyShiftVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                fWatcherName:
+                  type: string
+                  description: 交班人姓名
+                toWatcherName:
+                  type: string
+                  description: 接班人姓名
+                title:
+                  type: string
+                  description: 标题
+              allOf:
+                - $ref: '#/definitions/SearchBody'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/DailyShiftList'
+################ definitions#################
+definitions:
+#### 人员维护 ####
+  Dutyteam:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      teamName:
+        type: string
+        description: 列表显示
+      isShift:
+        type: string
+        description: 是否交接班，0否，1是
+      orgId:
+        type: string
+      orgName:
+        type: string
+      orderTeam:
+        type: integer
+        description: 排序
+  PersonList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+             type: boolean
+             description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Person'
+  Person:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      addrId:
+        type: string
+        description: 列表显示
+      addrName:
+        type: string
+        description: 列表显示
+      dutyteamId:
+        type: string
+        description: 列表显示
+      dutyteamName:
+        type: string
+      orgName:
+        type: string
+        description: 所属单位名称，列表显示
+      mobile:
+        type: string
+        description: 列表显示
+      telephone:
+        type: string
+        description: 列表显示
+      orderInTeam:
+        type: integer
+        description: 列表显示
+####  日历设置 ####
+  CalenSettings:
+    type: object
+    properties:
+      schedulingFlag:
+        type: string
+        description: 排班标志，0未排班，1已排班
+      calenSetting:
+        type: array
+        items:
+          $ref: '#/definitions/CalenSetting'
+  CalenSetting:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      settingDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”，列表显示
+      dateTypeCode:
+        type: integer
+        description: 列表显示，日期类型1工作日（展示为黑色），2双休日（展示为红色），3法定节假日，4特殊节假日（展示为红色且显示节假日名称），5其他（黑色）
+      holidayName:
+        type: string
+        description: 列表显示
+      day:
+        type: string
+        description: 日历左上角显示的天，即本月的第几天,列表显示
+####  模式设置 ####
+#  PatternSettingVO:
+#    type: object
+#    properties:
+#      patternSetting:
+#        type: object
+#        $ref: '#/definitions/PatternSetting'
+#      shiftPatterns:
+#        type: array
+#        items:
+#          $ref: '#/definitions/ShiftPattern'
+#      persontypePatterns:
+#        type: array
+#        items:
+#          $ref: '#/definitions/PersontypePattern'
+  PatternSetting:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      orgId:
+        type: string
+        description: 列表显示
+      dtypeCode:
+        type: integer
+        description: 列表显示 ，日期类型编码（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）
+      dtypeName:
+        type: string
+        description: 日期类型名称，列表显示
+  ShiftPattern:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      patternId:
+        type: string
+        description: 列表显示
+      shiftName:
+        type: string
+        description: 列表显示
+      startTime:
+        type: string
+        description: 格式 ：如08:00，列表显示
+      endTime:
+        type: string
+        description: 格式 ：如17:00，列表显示
+      isToday:
+        type: string
+        description: 结束时间是否当日（0：当日；1：次日），列表显示
+      shiftSeq:
+        type: string
+        description: 列表显示
+  PersontypePattern:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      patternId:
+        type: string
+        description: 列表显示
+      teamId:
+        type: string
+        description: 每日值班类型ID（来自值班人员分组），列表显示
+      teamName:
+        type: string
+        description: 值班分组名称，列表显示
+      dutyTypeCode:
+        type: string
+        description: 值班类型编码（0：按班次值班，1：按天值班），列表显示
+####  值班排班 ####
+  DateSearchVO:
+    type: object
+    properties:
+      orgId:
+        type: string
+        description: 所属单位ID
+      month:
+        type: string
+        description: 查询的月份，如“2018-09”
+  PersonSearchVO:
+    type: object
+    properties:
+      orgId:
+        type: string
+        description: 所属单位ID
+      month:
+        type: string
+        description: 查询的月份，如“2018-09”
+      personIds:
+        type: array
+        description: 值班人员的IDs
+        items:
+          type: string
+  PatternSearchVO:
+    type: object
+    properties:
+      orgId:
+        type: string
+        description: 所属单位ID
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-10-01”
+      ptypePattId:
+        type: string
+        description: 值班分组模式ID
+      shiftPattId:
+        type: string
+        description: 班次ID
+  MonthScheduling:
+    type: object
+    properties:
+      schedulingFlag:
+        type: string
+        description: 排班标志，0未排班，1已排班
+      calScheduling:
+        type: array
+        items:
+          $ref: '#/definitions/CalScheduling'
+  CalScheduling:
+    type: object
+    properties:
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      day:
+        type: string
+        description: 日历左上角显示的天，即本月的第几天,列表显示
+      weekDay:
+        type: string
+        description: 星期几，即该天是周几，如“星期三”
+      schedulingsForDay:
+        description: 按天排班的返回，ptypeCode等于1
+        type: array
+        items:
+          $ref: '#/definitions/SchedulingDayForShow'
+      schedulingsForTime:
+        description: 按次排班的返回,ptypeCode等于0
+        type: array
+        items:
+          $ref: '#/definitions/SchedulingTimeForShow'
+  CalSchedulingForOrg:
+    type: object
+    properties:
+      orgId:
+        type: string
+      orgName:
+        type: string
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      day:
+        type: string
+        description: 日历左上角显示的天，即本月的第几天,列表显示
+      weekDay:
+        type: string
+        description: 星期几，即该天是周几，如“星期三”
+      schedulingsForDay:
+        description: 按天排班的返回，ptypeCode等于1
+        type: array
+        items:
+          $ref: '#/definitions/SchedulingDayForShow'
+      schedulingsForTime:
+        description: 按次排班的返回,ptypeCode等于0
+        type: array
+        items:
+          $ref: '#/definitions/SchedulingTimeForShow'
+  ListScheduling:
+    type: object
+    properties:
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      day:
+        type: string
+        description: 日历左上角显示的天，即本月的第几天,列表显示
+      weekDay:
+        type: string
+        description: 星期几，即该天是周几，如“星期三”
+      schedulings:
+        description: 按天排班的返回，ptypeCode等于1
+        type: array
+        items:
+          $ref: '#/definitions/Scheduling'
+  SchedulingSingle:
+    type: object
+    properties:
+      id:
+        type: string
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”， 列表显示
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      shiftPatternId:
+        type: string
+        description: 班次ID（来自表ED_SHIFT_PATTERN）， 列表显示
+      shiftPatternName:
+        type: string
+        description: 班次名称，列表显示
+      dutyTeamId:
+        type: string
+        description: 值班分组ID（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      dutyTeamName:
+        type: string
+        description: 值班分组名称， 列表显示
+      ptypeCode:
+        type: string
+        description: 值班分组的值班类型编码（0：按班次值班，1：按天值班）-（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      personId:
+        type: string
+        description: 值班人员ID（来自表ED_PERSON），列表显示
+      personName:
+        type: string
+        description: 值班人员姓名，列表显示，需与personId一一对应
+      hisPersonId:
+        type: string
+        description: 原安排的值班人员ID（来自表ED_PERSON），列表显示
+      histPersonName:
+        type: string
+        description: 原安排的值班人员姓名，列表显示
+      startTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 8:30”， 列表显示
+      endTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 17:30”， 列表显示
+  Scheduling:
+    type: object
+    properties:
+      id:
+        type: string
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”， 列表显示
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      shiftPatternId:
+        type: string
+        description: 班次ID（来自表ED_SHIFT_PATTERN）， 列表显示
+      shiftPatternName:
+        type: string
+        description: 班次名称，列表显示
+      dutyTeamId:
+        type: string
+        description: 值班分组ID（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      dutyTeamName:
+        type: string
+        description: 值班分组名称， 列表显示
+      orderTeam:
+        type: integer
+        description: 分组排序
+      ptypeCode:
+        type: string
+        description: 值班分组的值班类型编码（0：按班次值班，1：按天值班）-（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      personInfo:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: 值班人员ID
+            addrName:
+              type: string
+              description: 值班人员姓名
+            hisPersonId:
+              type: string
+              description: 原安排的值班人员ID（来自表ED_PERSON），列表显示
+            histPersonName:
+              type: string
+              description: 原安排的值班人员姓名，列表显示
+      startTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 8:30”， 列表显示
+      endTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 17:30”， 列表显示
+  SchedulingDayForShow:
+    type: object
+    properties:
+      id:
+        type: string
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”， 列表显示
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      dutyTeamId:
+        type: string
+        description: 值班分组ID（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      dutyTeamName:
+        type: string
+        description: 值班分组名称， 列表显示
+      orderTeam:
+        type: integer
+        description: 分组排序
+      ptypeCode:
+        type: string
+        description: 值班分组的值班类型编码（0：按班次值班，1：按天值班）-（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      personInfo:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: 值班人员ID
+            addrName:
+              type: string
+              description: 值班人员姓名
+            hisPersonId:
+              type: string
+              description: 原安排的值班人员ID（来自表ED_PERSON），列表显示
+            histPersonName:
+              type: string
+              description: 原安排的值班人员姓名，列表显示
+      startTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 8:30”， 列表显示
+      endTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 17:30”， 列表显示
+  SchedulingTimeForShow:
+    type: object
+    properties:
+      shiftPatternId:
+        type: string
+        description: 班次ID（来自表ED_SHIFT_PATTERN）， 列表显示
+      shiftPatternName:
+        type: string
+        description: 班次名称，列表显示
+      shiftSeq:
+        type: string
+        description: 班次排序
+      startTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 8:30”， 列表显示
+      endTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 17:30”， 列表显示
+      schedulingDetail:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            dutyDate:
+              type: string
+              format: date
+              description: 年-月-日，如“2018-09-28”， 列表显示
+            dateTypeCode:
+              type: integer
+              description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+            dateTypeName:
+              type: string
+              description: 日期类型名称
+            holidayName:
+              type: string
+              description: 节假日名称，如中秋节等，列表显示
+            dutyTeamId:
+              type: string
+              description: 值班分组ID（来自表ED_PERSON_TYPE_PATTERN），列表显示
+            dutyTeamName:
+              type: string
+              description: 值班分组名称， 列表显示
+            orderTeam:
+              type: integer
+              description: 分组排序
+            ptypeCode:
+              type: string
+              description: 值班分组的值班类型编码（0：按班次值班，1：按天值班）-（来自表ED_PERSON_TYPE_PATTERN），列表显示
+            personInfo:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: 值班人员ID
+                  addrName:
+                    type: string
+                    description: 值班人员姓名
+                  hisPersonId:
+                    type: string
+                    description: 原安排的值班人员ID（来自表ED_PERSON），列表显示
+                  histPersonName:
+                    type: string
+                    description: 原安排的值班人员姓名，列表显示
+            startTime:
+              type: string
+              format: date-time
+              description: 年-月-日 小时：分，如“2018-09-28 8:30”， 列表显示
+            endTime:
+              type: string
+              format: date-time
+              description: 年-月-日 小时：分，如“2018-09-28 17:30”， 列表显示
+  PerSchelVO:
+    type: object
+    properties:
+      shiftPatternName:
+        type: string
+        description: 班次名称
+      personId:
+        type: string
+        description: 值班人员ID
+      personName:
+        type: string
+        description: 值班人员姓名
+  PerPatternVO:
+    type: object
+    properties:
+      dutyDate:
+        type: string
+        format: date
+      dutyTeamId:
+        type: string
+        description: 人员分组名称ID
+      dutyTeamName:
+        type: string
+        description: 人员分组名称
+      orderTeam:
+        type: integer
+        description: 分组排序
+      isShift:
+        type: string
+        description: 是否交接班，0否，1是
+      shiftPattId:
+        type: string
+        description: 班次ID
+      shiftPattName:
+        type: string
+        description: 班次名称
+      personInfo:
+        type: array
+        description: 值班人员信息
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: 值班人员ID
+            addrName:
+              type: string
+              description: 值班人员姓名
+####  值班统计 ####
+  DutyStaSearchVO:
+    type: object
+    properties:
+      orgId:
+        type: string
+        description: 所属单位ID
+      teamId:
+        type: string
+        description: 分组ID
+      personIds:
+        type: array
+        description: 值班人员IDs
+        items:
+          type: string
+      startTime:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-10-01”
+      endTime:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-10-01”
+  DutyStatistics:
+    type: object
+    properties:
+      personId:
+        type: string
+        description: 值班人员ID，列表显示
+      personName:
+        type: string
+        description: 值班人员姓名，列表显示
+      data:
+        type: array
+        items:
+          properties:
+            dateTypeCode:
+              type: integer
+              description: 日期类型编码（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+            number:
+              type: integer
+              description: 值班次数，列表显示
+      total:
+        type: integer
+        description: 值班合计， 列表显示
+#### dailylogs ####
+  DailyLog:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      affirtTypeId:
+        type: string
+        description: 列表显示
+      affirtTypeName:
+        type: string
+        description: 新增时前端可不传该属性， 列表显示
+      emeGradeFlag:
+        type: string
+        description: 0重要,1一般， 列表显示
+        enum:
+          - 0
+          - 1
+      treatTime:
+        type: string
+        format: date-time
+        description: 列表显示
+      treatStatus:
+         type: string
+         description: 0待办，1为办理中，2为办结， 列表显示
+         enum:
+           - 0
+           - 1
+           - 2
+      inputerId:
+        type: string
+        description: 记录人id
+      inputerName:
+        type: string
+        description: 记录人姓名，列表显示
+      logContent:
+        type: string
+        description: 列表显示
+  DailyLogTreatment:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      dlogId:
+        type: string
+        description: 列表显示
+      dlogTreatment:
+        type: string
+        description: 列表显示
+      treatBy:
+        type: string
+      treatTime:
+        type: string
+        format: date-time
+      treatStatus:
+        type: string
+        description: 0待办，1为办理中，2为办结
+        enum:
+             - 0
+             - 1
+  DailyLogVo:
+    type: object
+    properties:
+      dailyLog:
+        $ref: '#/definitions/DailyLog'
+      dLogTreatment:
+        type: array
+        description: 列表显示
+        items:
+          $ref: '#/definitions/DailyLogTreatment'
+  DailyLogList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+       data:
+         type: object
+         properties:
+           totalElements:
+             type: integer
+             description: 记录总数
+           totalPages:
+             type: integer
+             description: 总页数
+           first:
+             type: boolean
+             description: 是否第一页
+           last:
+             type: boolean
+             description: 是否最后一页
+           number:
+             type: integer
+             description: 当前页数，页码从0开始
+           size:
+             type: integer
+             description: 每页记录数
+           sort:
+             type: string
+           numberOfElements:
+             type: integer
+             description: 返回记录条数
+           content:
+             type: array
+             items:
+                $ref: '#/definitions/DailyLogVo'
+#### dailyshifts ####
+  DailyShift:
+     type: object
+     properties:
+       id:
+         type: string
+         description: 列表显示
+       title:
+         type: string
+         description:  列表显示
+       fromWatcherId:
+         type: string
+         description: 列表显示
+       fromWatcherName:
+         type: string
+         description: 列表显示
+       toWatcherId:
+         type: string
+         description: 列表显示
+       toWatcherName:
+         type: string
+         description: 列表显示
+       notes:
+         type: string
+       createTime:
+         type: string
+         format: date-time
+         description: 列表显示
+  DailyShiftVO:
+    type: object
+    properties:
+      dailyLogShift:
+        type: array
+        items:
+          $ref: '#/definitions/DailyLogShift'
+      dailyShift:
+         $ref: '#/definitions/DailyShift'
+  DailyLogShift:
+    type: object
+    properties:
+      id:
+        type: string
+      dailyLogId:
+        type: string
+      affirtTypeId:
+        type: string
+        description: 事项类型ID
+      affirtTypeName:
+        type: string
+        description: 事项类型名称
+      logContent:
+        type: string
+        description: 内容
+      treatStatus:
+         type: string
+         description: 0待办，1为办理中，2为办结
+         enum:
+           - 0
+           - 1
+           - 2
+      inputerName:
+        type: string
+        description: 记录人姓名
+      treatTime:
+        type: string
+        format: date-time
+        description: 办理时间
+      dailyShiftId:
+        type: string
+  DailyShiftList:
+     type: object
+     allOf:
+        - $ref: '#/definitions/ReturnResult'
+     properties:
+        data:
+          type: object
+          properties:
+            totalElements:
+              type: integer
+              description: 记录总数
+            totalPages:
+               type: integer
+               description: 总页数
+            first:
+               type: boolean
+               description: 是否第一页
+            last:
+                type: boolean
+                description: 是否最后一页
+            number:
+                type: integer
+                description: 当前页数，页码从0开始
+            size:
+                type: integer
+                description: 每页记录数
+            sort:
+                 type: string
+            numberOfElements:
+                 type: integer
+                 description: 返回记录条数
+            content:
+                 type: array
+                 items:
+                   $ref: '#/definitions/DailyShift'
+##### common model####
+  SearchBody:
+    type: object
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+############################ parameters#####################
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string

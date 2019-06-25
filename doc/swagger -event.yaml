@@ -1,0 +1,3411 @@
+swagger: '2.0'
+info:
+  description: >-
+    信息接报、事件管理、应急处置、处置跟踪、总结评估等.
+  version: 1.0.0
+  title: event事件处置
+host: 127.0.0.1:8000
+basePath: /emp-event/v1
+tags:
+  - name: 信息接报管理infoDispatch
+    description: 突发事件接收、报送信息管理
+  - name: 接报设置管理infoConfig
+    description: 接报设置信息管理
+  - name: 事件管理event
+    description: 突发事件信息管理
+  - name: 应急处置-分析研判cmdAnalyse
+    description: 突发事件综合分析研判
+  - name: 【浙能需求】应急处置-应急日志cmdEventLog
+    description: 突发事件应急日志
+  - name: 应急处置-方案管理cmdScheme
+    description: 处置方案信息管理
+  - name: 应急处置-预案启动cmdPlan
+    description: 应急预案启动
+  - name: 应急处置-应急组织机构cmdOrg
+    description: 应急组织机构责任单位和人员管理
+  - name: 应急处置-应急专家调度cmdExpert
+    description: 应急专家调度
+  - name: 应急处置-应急队伍调度cmdTeam
+    description: 应急队伍资源调度
+  - name: 应急处置-应急物资调度cmdMaterial
+    description: 应急物资资源调度
+  - name: 应急处置-社会依托资源调度cmdSupport
+    description: 社会依托资源调度
+  - name: 处置跟踪cmdTrack
+    description: 任务及处置反馈跟踪
+  - name: 总结评估-过程再现evaProcess
+    description: 从事件发生接报到事件处置结束全过程的记录,包括文本、图片、音视频文件等。
+  - name: 总结评估-事件评估evaEventEva
+    description: 对事件应急处置全过程进行评估，并生成事件评估报告。
+  - name: 总结评估-评估指标管理
+    description: 包括事件评估指标管理。
+schemes:
+  - http
+paths:
+####信息接报管理####
+ /infoMags/searchInfoByButton:
+    post:
+      tags:
+        - 信息接报管理infoDispatch
+      summary: '根据条件查询信息列表-分页'
+      operationId: findInfoReports
+      parameters:
+        - name: infoReportVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              buttonType:
+                type: string
+                description: 查询选择标签类型：00信息录入，01接收待办；10信息已办，11接收已办（后台操作：TYPE为00，则IM_ACCEPT_DEAL中CREATE_ORG_ID和DEAL_ORG_ID均为当前登录者所属单位ID，且DEAL_FLAG为0；TYPE为01，则IM_ACCEPT_DEAL中DEAL_ORG_ID为当前登录者所属单位ID，CREATE_ORG_ID不为当前登录者单位ID，且DEAL_FLAG为0；TYPE为10，则IM_ACCEPT_DEAL中CREATE_ORG_ID和DEAL_ORG_ID均为当前登录者所属单位ID，且DEAL_FLAG不等于0；TYPE为11，则IM_ACCEPT_DEAL中DEAL_ORG_ID为当前登录者所属单位ID，CREATE_ORG_ID不为当前登录者单位ID，且DEAL_DEAL_FLAG不等于0；获取ACCEPT_ID集合后再根据其他查询条件查询IM_ACCEPT表中对应的具体接报信息返回）
+                enum:
+                  - '00'
+                  - '01'
+                  - '10'
+                  - '11'
+              eventName:
+                type: string
+                description: 信息名称
+              eventTypeIds:
+                type: array
+                description: eventTypeIds为事件类型选择Ids，数组
+                items:
+                  type: string
+              eventGradeId:
+                type: string
+                description: 事件等级
+              startDate:
+                type: string
+                format: 'date-time'
+                description: 事发时间——开始时间
+              endDate:
+                type: string
+                format: 'date-time'
+                description: 事发时间——结束时间
+              createOrgId:
+                type: string
+                description: 当前用户所属单位ID
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/IMAcceptList'
+ /infoMags/:
+   post:
+     tags:
+       - 信息接报管理infoDispatch
+     summary: '信息填报，包括初报、续报，需同时更新IM_ACCEPT_DEAL表'
+     operationId: addInfo
+     parameters:
+       - name: imAcceptVo
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/IMAcceptVo'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /infoMags/{id}:
+   put:
+     tags:
+       - 信息接报管理infoDispatch
+     summary: '修改信息'
+     operationId: updateInfo
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: imAcceptVo
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/IMAcceptVo'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   get:
+     tags:
+       - 信息接报管理infoDispatch
+     summary: '获取单条上报、接报信息'
+     operationId: findInfoReportById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/IMAccept'
+   delete:
+     tags:
+       - 信息接报管理infoDispatch
+     summary: '删除信息'
+     operationId: deleteInfo
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /infoMags/dealInfo:
+   post:
+     tags:
+       - 信息接报管理infoDispatch
+     summary: '办理信息，包括发送、退回、办结、生成/更新事件'
+     operationId: dealInfo
+     parameters:
+       - name: buttonFlag
+         in: query
+         required: true
+         type: string
+         description: 按钮含义：发送1、退回2、办结3、生成事件4、更新事件5
+       - name: infoDispatch
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/IMAcceptDeal'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /infoMags/checkReturnReason/{id}:
+   get:
+     tags:
+       - 信息接报管理infoDispatch
+     summary: '查看退回原因'
+     operationId: checkReturnReason
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/IMAcceptDeal'
+ /infoMags/searchInfoByEvent:
+   post:
+     tags:
+       - 信息接报管理infoDispatch
+     summary: 通过事件ID，获取该事件下的全部初报、续报信息，先查询IM_ACCEPT_DEAL表，然后根据eventID，获取acceptID后再查详情
+     operationId: getInfoListByEventId
+     parameters:
+       - name: eventId
+         type: string
+         in: query
+         required: true
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/IMAccept'
+ /infoMags/getEventIdByFirstInfoId/{id}:
+   get:
+     tags:
+       - 信息接报管理infoDispatch
+     summary: '根据接报信息的初报ID，获取其需要更新的事件Id'
+     operationId: getEventIdByFirstInfoId
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+           - $ref: '#/definitions/ReturnResult'
+           properties:
+             eventId:
+               type: string
+ ####接报设置管理####
+ /acceptInforms:
+   post:
+     tags:
+       - 接报设置管理infoConfig
+     summary: '新增通知单位'
+     operationId: addAcceptInform
+     parameters:
+       - name: AcceptInform
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/AcceptInform'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /acceptInforms/{id}:
+   get:
+     tags:
+       - 接报设置管理infoConfig
+     summary: 获取单个通知单位信息
+     operationId: findAcceptInformById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description:  OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/AcceptInform'
+   put:
+     tags:
+        - 接报设置管理infoConfig
+     summary: '修改通知单位信息'
+     operationId: updateAcceptInform
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: sms
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/AcceptInform'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 接报设置管理infoConfig
+     summary: '删除通知单位'
+     operationId: deleteAcceptInform
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /acceptInforms/searchAll:
+   post:
+     tags:
+       - 接报设置管理infoConfig
+     summary: '根据条件查询通知单位列表'
+     operationId: findAcceptInforms
+     parameters:
+       - name: acceptInformVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             eventTypeId:
+               type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/AcceptInform'
+ /acceptRules:
+   post:
+     tags:
+       - 接报设置管理infoConfig
+     summary: '接报要求设置'
+     operationId: addAcceptRule
+     parameters:
+       - name: AcceptReq
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/AcceptRule'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /acceptRules/{id}:
+   put:
+     tags:
+       - 接报设置管理infoConfig
+     summary: '修改接报要求信息'
+     operationId: updateAcceptRule
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: sms
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/AcceptRule'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /acceptRules/getRuleSetting:
+   post:
+     tags:
+       - 接报设置管理infoConfig
+     summary: '根据条件查询接报要求'
+     operationId: findAcceptRules
+     parameters:
+       - name: acceptReqVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             eventTypeId:
+                type: string
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/AcceptRule'
+
+#### 事件管理 ####
+ /events:
+    post:
+      tags:
+        - 事件管理event
+      summary: '生成新事件，处置状态默认为处置中，处置开始时间为系统当前时间'
+      operationId: addEvent
+      parameters:
+        - name: event
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Event'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /events/{id}:
+    get:
+        tags:
+          - 事件管理event
+        summary: 获取单条事件信息
+        operationId: findEventById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/Event'
+    put:
+        tags:
+          - 事件管理event
+        summary: '更新事件信息，其中事件名称、事发地点、经纬度、事件等级、死亡人数、受伤人数项可编辑 ，事发原因、事件描述、采取措施、资源请求项可在原事件基础上进行追加'
+        operationId: updateEvent
+        parameters:
+          - $ref: '#/parameters/id-p'
+          - name: event
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/Event'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+ /events/search:
+    post:
+        tags:
+          - 事件管理event
+        summary: '根据条件查询事件列表-分页'
+        operationId: findEvents
+        parameters:
+          - name: eventVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                eventName:
+                  type: string
+                  description: 事件名称
+                eventGradeId:
+                  type: string
+                  description: 事件等级ID
+                eventTypeIds:
+                  type: array
+                  description: eventTypeIds为事件类型选择Ids，数组
+                  items:
+                    type: string
+                handleFlags:
+                  type: array
+                  description: 处置状态标志位数组：a.事件管理模块默认查询显示0-处置中；b.过程再现模块默认查询显示0-处置中、1-处置结束状态；c.处置评估模块默认查询显示1-处置结束状态。默认值由前端传入参数。
+                  items:
+                    type: string
+                createOrgId:
+                  type: string
+                  description: 合成事件部门ID，为空时默认为登录用户所属单位ID进行数据过滤
+              allOf:
+                - $ref: '#/definitions/SearchBody'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/EventList'
+# /events/complete:
+#    put:
+#        tags:
+#          - 事件管理event
+#        summary: '事件处置结束，将事件处置状态置为已结束状态'
+#        operationId: completeEvent
+#        parameters:
+#          - name: eventId
+#            in: query
+#            description: 事件ID
+#            type: string
+#        responses:
+#          200:
+#            description: OK
+#            schema:
+#              $ref: '#/definitions/ReturnResult'
+ /events/adjustGrade:
+    put:
+        tags:
+          - 事件管理event
+        summary: '调整事件等级，与原事件等级比对，更新事件表中的事件等级。'
+        operationId: adjustEventGrade
+        parameters:
+          - name: eventId
+            in: query
+            description: 事件ID
+            type: string
+          - name: eventGradeId
+            in: query
+            description: 事件等级ID
+            type: string
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+ /events/updateStatus:
+    put:
+        tags:
+          - 事件管理event
+        summary: '当事件处置结束、评估或案例归档后，通过前台传参，后台将事件处置状态更新为对应的事件状态'
+        operationId: updateEventStatus
+        parameters:
+          - name: eventId
+            in: query
+            description: 事件ID
+            type: string
+          - name: handleFlag
+            in: query
+            description: 处置状态 0处置中，1处置结束，2已评估，3已归档
+            type: string
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+ /events/exportToWord:
+    get:
+      tags:
+        - 事件管理event
+      summary: 根据条件导出事件word
+      operationId: exportToWord
+      produces:
+       - 'application/octet-stream'
+      parameters:
+        - name: eventId
+          in: query
+          type: string
+          required: true
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+#### 应急处置 分析研判####
+ /cmd/analyses:
+    post:
+      tags:
+        - 应急处置-分析研判cmdAnalyse
+      summary: '新增事件分析研判意见(含附件)'
+      operationId: addEventAnalyse
+      parameters:
+        - name: eventAnalyse
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EventAnalyseVo'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/analyses/{id}:
+    put:
+      tags:
+        - 应急处置-分析研判cmdAnalyse
+      summary: '更新事件分析研判信息（含附件）'
+      operationId: updateEventAnalyse
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: eventAnalyse
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EventAnalyseVo'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+         - 应急处置-分析研判cmdAnalyse
+      summary: '获取单条事件分析研判信息'
+      operationId: findEventAnalyseById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/EventAnalyse'
+    delete:
+      tags:
+        - 应急处置-分析研判cmdAnalyse
+      summary: '删除单条事件分析研判信息'
+      operationId: deleteEventAnalyse
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/analyses/searchAll:
+    post:
+      tags:
+        - 应急处置-分析研判cmdAnalyse
+      summary: '根据条件查询事件分析研判结果列表-不分页'
+      operationId: findEventAnalysesAll
+      parameters:
+        - name: analyseVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              eventId:
+                type: string
+                description: 事件ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EventAnalyse'
+####应急处置 应急日志####
+ /cmd/eventLog:
+   post:
+     tags:
+       - '【浙能需求】应急处置-应急日志cmdEventLog'
+     summary: '新增事件应急日志'
+     operationId: addEventLog
+     parameters:
+       - name: eventLog
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/EventLog'
+     responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/eventLog/{id}:
+   put:
+     tags:
+       - '【浙能需求】应急处置-应急日志cmdEventLog'
+     summary: '更新事件应急日志'
+     operationId: updateEventLog
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: eventLog
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/EventLog'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   get:
+     tags:
+       - '【浙能需求】应急处置-应急日志cmdEventLog'
+     summary: '查看单条事件应急日志'
+     operationId: findEventLog
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/EventLog'
+   delete:
+     tags:
+       - '【浙能需求】应急处置-应急日志cmdEventLog'
+     summary: '删除事件应急日志'
+     operationId: deleteEventLog
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /cmd/eventLog/searchAll:
+   post:
+     tags:
+       - '【浙能需求】应急处置-应急日志cmdEventLog'
+     summary: '获取该事件的全部未删除的应急日志'
+     operationId: findEventLogAll
+     parameters:
+       - name: eventLogVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             eventId:
+               type: string
+               description: 事件ID
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/EventLog'
+#### 应急处置 方案管理###
+ /cmd/schemes:
+    post:
+       tags:
+         - 应急处置-方案管理cmdScheme
+       summary: '启动预案，生成处置方案基本信息，处置方案名称默认为‘eventName+处置方案’'
+       operationId: addEcScheme
+       parameters:
+         - name: ecScheme
+           in: body
+           required: true
+           schema:
+             type: object
+             properties:
+               eventId:
+                 type: string
+                 description: 事件ID
+               eventName:
+                 type: string
+                 description: 事件名称
+       responses:
+         200:
+           description: OK
+           schema:
+             type: object
+             allOf:
+                - $ref: '#/definitions/ReturnResult'
+             properties:
+                data:
+                    $ref: '#/definitions/Scheme'
+    get:
+      tags:
+          - 应急处置-方案管理cmdScheme
+      summary: '根据事件ID获取事件处置方案基本信息'
+      operationId: findSchemeVoByEventId
+      parameters:
+        - name: eventId
+          in: query
+          description: 事件ID
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Scheme'
+ /cmd/schemes/{id}:
+    put:
+      tags:
+        - 应急处置-方案管理cmdScheme
+      summary: '修改处置方案名称'
+      operationId: updateScheme
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: scheme
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Scheme'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+#### 应急处置  启动预案####
+ /cmd/plans:
+    post:
+      tags:
+        - 应急处置-预案启动cmdPlan
+      summary: '应急预案和处置方案关联（只含新增的，不包括已关联过的预案）'
+      operationId: addEcPlans
+      parameters:
+        - name: ecPlans
+          in: body
+          required: true
+          schema:
+              type: array
+              items:
+                    $ref: '#/definitions/EcPlan'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/plans/searchAll:
+    post:
+      tags:
+        - 应急处置-预案启动cmdPlan
+      summary: '根据条件查询处置方案已关联的应急预案信息'
+      operationId: findPlansAll
+      parameters:
+        - name: planVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcPlan'
+#### 应急处置 应急组织管理####
+ /cmd/emgorgs:
+    post:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: '新增应急组织机构'
+      operationId: addEcEmgOrg
+      parameters:
+        - name: ecEmgOrg
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EcEmgOrg'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/emgorgs/{id}:
+    get:
+      tags:
+         - 应急处置-应急组织机构cmdOrg
+      summary: 获取单条应急组织机构信息
+      operationId: findEcEmgOrgById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/EcEmgOrg'
+    put:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: '修改应急组织机构'
+      operationId: updateEcEmgOrg
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: emgOrg
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EcEmgOrg'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    delete:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: '删除应急组织机构（含该机构下关联的责任单位/人员）'
+      operationId: deleteEcEmgOrg
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/emgorgs/searchAll:
+    post:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: '根据条件查询应急组织机构树信息'
+      operationId: findEmgOrgsAll
+      parameters:
+        - name: emgOrgVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+              planId:
+                type: string
+                description: 预案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/EcEmgOrgTreeVo'
+ /cmd/emgorgs/plans:
+    post:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: '根据启动的预案数字化信息生成关联的应急组织机构'
+      operationId: addPlanEmgOrgs
+      parameters:
+        - name: ecEmgOrgs
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              planIds:
+                type: array
+                description: 启动的预案ID，数组
+                items:
+                  type: string
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcEmgOrg'
+#### 应急处置 责任单位/人调度###
+ /cmd/orgrespons:
+    post:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: '新增应急责任单位/人'
+      operationId: addEcOrgRespon
+      parameters:
+        - name: ecOrgRespon
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EcOrgRespon'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/orgrespons/{id}:
+    get:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: 获取单条责任单位/人信息
+      operationId: findEcOrgResponById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/EcOrgRespon'
+    put:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: '修改责任单位/人'
+      operationId: updateEcOrgRespon
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: ecOrgRespon
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EcOrgRespon'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    delete:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: '删除责任单位/人'
+      operationId: deleteEcOrgRespon
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/orgrespons/searchAll:
+    post:
+      tags:
+        - 应急处置-应急组织机构cmdOrg
+      summary: '根据条件查询责任单位/人信息'
+      operationId: findOrgResponsAll
+      parameters:
+        - name: orgResponVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              emgOrgId:
+                type: string
+                description: 应急组织机构ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcOrgRespon'
+ /cmd/orgrespons/plans:
+    post:
+      tags:
+        - '应急处置-应急组织机构cmdOrg'
+      summary: '根据启动的预案数字化的应急组织机构和方案的应急组织机构，将预案数字化中的责任单位/人信息生成为方案中的责任单位/人信息'
+      operationId: addPlanEmgOrgRespons
+      parameters:
+        - name: cmdOrg
+          in: body
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/EcEmgOrg'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+#### 应急处置 专家调度####
+ /cmd/experts:
+    post:
+      tags:
+        - 应急处置-应急专家调度cmdExpert
+      summary: '新增关联应急专家'
+      operationId: addEcExperts
+      parameters:
+        - name: ecExperts
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+              expertIds:
+                type: array
+                description: 关联的专家ID,数组
+                items:
+                  type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/experts/{id}:
+    delete:
+      tags:
+        - 应急处置-应急专家调度cmdExpert
+      summary: '删除关联的应急专家'
+      operationId: deleteEcExpert
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/experts/searchAll:
+    post:
+      tags:
+        - 应急处置-应急专家调度cmdExpert
+      summary: '根据条件查询处置方案已关联的应急专家信息'
+      operationId: findExpertsAll
+      parameters:
+        - name: expertVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcExpert'
+ /cmd/experts/plans:
+    post:
+      tags:
+        - 应急处置-应急专家调度cmdExpert
+      summary: '根据启动的预案数字化信息生成关联的应急专家信息'
+      operationId: addPlanExperts
+      parameters:
+        - name: ecExperts
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              planIds:
+                type: array
+                description: 启动的预案ID，数组
+                items:
+                  type: string
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+#### 应急处置 队伍调度####
+ /cmd/teams:
+    post:
+      tags:
+        - 应急处置-应急队伍调度cmdTeam
+      summary: '新增关联应急队伍'
+      operationId: addEcTeams
+      parameters:
+        - name: ecTeams
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+              teamIds:
+                type: array
+                description: 关联的队伍ID,数组
+                items:
+                  type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/teams/{id}:
+    delete:
+      tags:
+        - 应急处置-应急队伍调度cmdTeam
+      summary: '删除关联的应急队伍'
+      operationId: deleteEcTeam
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/teams/searchAll:
+    post:
+      tags:
+        - 应急处置-应急队伍调度cmdTeam
+      summary: '根据条件查询处置方案已关联的应急队伍信息'
+      operationId: findTeamsAll
+      parameters:
+        - name: teamVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcTeam'
+ /cmd/teams/plans:
+    post:
+      tags:
+        - 应急处置-应急队伍调度cmdTeam
+      summary: '根据启动的预案数字化信息生成关联的应急队伍信息'
+      operationId: addPlanTeams
+      parameters:
+        - name: ecTeams
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              planIds:
+                type: array
+                description: 启动的预案ID，数组
+                items:
+                  type: string
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/teams/getTeamsForGis:
+   post:
+     tags:
+       - '应急处置-应急队伍调度cmdTeam'
+     summary: '【2019年1月18日新增】按照地图格式要求获取方案中的队伍信息'
+     operationId: getTeamsForGis
+     parameters:
+       - name: teamVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             schemeId:
+               type: string
+               description: 处置方案ID
+     responses:
+       200:
+         description: OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/EcTeamForGis'
+#### 应急处置 物资调度####
+ /cmd/materials:
+    post:
+      tags:
+        - 应急处置-应急物资调度cmdMaterial
+      summary: '新增关联应急物资'
+      operationId: addEcMaterials
+      parameters:
+        - name: ecMaterials
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+              materialIds:
+                type: array
+                description: 关联的物资ID,数组
+                items:
+                  type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/materials/{id}:
+    delete:
+      tags:
+        - 应急处置-应急物资调度cmdMaterial
+      summary: '删除关联的应急物资'
+      operationId: deleteEcMaterial
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/materials/searchAll:
+    post:
+      tags:
+        - 应急处置-应急物资调度cmdMaterial
+      summary: '根据条件查询处置方案已关联的应急物资信息'
+      operationId: findMaterialsAll
+      parameters:
+        - name: materialVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcMaterial'
+ /cmd/materials/plans:
+    post:
+      tags:
+        - 应急处置-应急物资调度cmdMaterial
+      summary: '根据启动的预案数字化信息生成关联的应急物资信息'
+      operationId: addPlanMaterials
+      parameters:
+        - name: ecTeams
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              planIds:
+                type: array
+                description: 启动的预案ID，数组
+                items:
+                  type: string
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/materials/getMaterialsForGis:
+   post:
+     tags:
+       - '应急处置-应急物资调度cmdMaterial'
+     summary: '【2019年1月18日新增】按照地图格式要求获取方案中的物资信息'
+     operationId: getMaterialsForGis
+     parameters:
+       - name: materialVO
+         in: body
+         required: true
+         schema:
+           type: object
+           properties:
+             schemeId:
+               type: string
+               description: 处置方案ID
+     responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcMaterialForGis'
+
+#### 应急处置 社会依托资源调度####
+ /cmd/supports:
+    post:
+      tags:
+        - 应急处置-社会依托资源调度cmdSupport
+      summary: '新增关联社会依托资源'
+      operationId: addEcSupports
+      parameters:
+        - name: ecSupports
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+              supportIds:
+                type: array
+                description: 关联的社会依托资源ID,数组
+                items:
+                  type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/supports/{id}:
+    delete:
+      tags:
+        - 应急处置-社会依托资源调度cmdSupport
+      summary: '删除关联的社会依托资源'
+      operationId: deleteEcSupport
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/supports/searchAll:
+    post:
+      tags:
+        - 应急处置-社会依托资源调度cmdSupport
+      summary: '根据条件查询处置方案已关联的社会依托资源信息'
+      operationId: findSupportsAll
+      parameters:
+        - name: supportVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcSupport'
+ /cmd/supports/plans:
+    post:
+      tags:
+        - 应急处置-社会依托资源调度cmdSupport
+      summary: '根据启动的预案数字化信息生成关联的社会依托资源信息'
+      operationId: addPlanSupports
+      parameters:
+        - name: ecTeams
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              planIds:
+                type: array
+                description: 启动的预案ID，数组
+                items:
+                  type: string
+              schemeId:
+                type: string
+                description: 处置方案ID
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/supports/getSupportForGis:
+   post:
+     tags:
+       - '应急处置-社会依托资源调度cmdSupport'
+     summary: '【2019年1月18日新增】按照地图格式要求获取方案中的社会依托资源信息'
+     operationId: getSupportForGis
+     parameters:
+        - name: supportVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+     responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcSupportForGis'
+
+#### 处置跟踪 ####
+ /cmd/tasks:
+    post:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '新增应急任务'
+      operationId: addTask
+      parameters:
+        - name: task
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EcTask'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/tasks/{id}:
+    get:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: 获取单条任务信息
+      operationId: findTaskById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/EcTask'
+    put:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '修改关联的任务信息'
+      operationId: updateTask
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: task
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EcTask'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    delete:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '删除关联的任务信息'
+      operationId: deleteTask
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/tasks/search:
+    post:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '根据条件查询任务列表-分页'
+      operationId: findTasks
+      parameters:
+        - name: taskVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              eventName:
+                type: string
+                description: 事件名称
+              schemeName:
+                type: string
+                description: 方案名称
+              taskName:
+                type: string
+                description: 任务标题
+              taskStatus:
+                type: array
+                description: 任务状态 0未下发 1已下发 2已完成
+                items:
+                  type: string
+              createStartTime:
+                type: string
+                description: 创建时间段-开始时间
+                format: 'date-time'
+              createEndTime:
+                type: string
+                description: 创建时间段-截止时间
+                format: 'date-time'
+              flag:
+                type: string
+                description: 任务分类标志位 0下发任务列表 （通过TC_TASK表里的任务创建单位create_org_id与当前登录用户所属部门匹配查询） 1接收任务列表 （通过EC_TASK_EXEORG里的任务接收单位org_id与当前登录用户所属部门匹配查询）
+                enum:
+                    - 0
+                    - 1
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/EcTaskList'
+ /cmd/tasks/searchAll:
+    post:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '根据条件查询任务列表-不分页'
+      operationId: findTasksAll
+      parameters:
+        - name: taskVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              schemeId:
+                type: string
+                description: 处置方案ID
+              eventName:
+                type: string
+                description: 事件名称
+              schemeName:
+                type: string
+                description: 方案名称
+              taskName:
+                type: string
+                description: 任务标题
+              taskStatus:
+                type: array
+                description: 任务状态 0未下发 1已下发 2已完成
+                items:
+                  type: string
+              createStartTime:
+                type: string
+                description: 创建时间段-开始时间
+                format: 'date-time'
+              createEndTime:
+                type: string
+                description: 创建时间段-截止时间
+                format: 'date-time'
+              flag:
+                type: string
+                description: 任务分类标志位 0下发任务列表 （通过TC_TASK表里的任务创建单位create_org_id与当前登录用户所属部门匹配查询） 1接收任务列表 （通过EC_TASK_EXEORG里的任务接收单位org_id与当前登录用户所属部门匹配查询）
+                enum:
+                  - 0
+                  - 1
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcTask'
+ /cmd/tasks/plans:
+    post:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '根据启动的预案数字化信息生成关联的任务信息-供处置跟踪使用'
+      operationId: addPlanTasks
+      parameters:
+        - name: tasks
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              planIds:
+                type: array
+                description: 启动的预案ID，数组
+                items:
+                  type: string
+              schemeId:
+                type: string
+                description: 处置方案ID
+              eventId:
+                type: string
+                description: 事件ID
+              schemeName:
+                type: string
+                description: 处置方案名称
+              eventName:
+                type: string
+                description: 事件名称
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/tasks/dispatch:
+    post:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '下发任务信息，更新下发时间和任务状态信息'
+      operationId: dispatchTask
+      parameters:
+        - name: taskDispatch
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              taskId:
+                type: string
+#              orgIdANames:
+#                type: array
+#                description: 下发的接收部门的ID和名称，数组
+#                items:
+#                  type: object
+#                  properties:
+#                    orgId:
+#                      type: string
+#                    orgName:
+#                      type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/tasks/timeAxis:
+    post:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '根据处置方案ID查询已下发和已完成的任务信息并以时间轴形式显示-供处置跟踪使用'
+      operationId: taskTimeAxis
+      parameters:
+          - name: taskVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+               schemeId:
+                  type: string
+                  description: 处置方案ID
+               taskStatus:
+                  type: array
+                  description: 任务状态 0未下发 1已下发 2已完成
+                  items:
+                    type: string
+      responses:
+          200:
+            description: OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/EcTaskListVo'
+ /cmd/taskfeedback:
+    post:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '新增任务反馈信息（含附件）'
+      operationId: addEcTaskFeedback
+      parameters:
+        - name: ecTaskFeedback
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EcTaskFeedbackVo'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '根据任务ID获取该条任务所有反馈信息'
+      operationId: findTaskFeedbacksByTaskId
+      parameters:
+        - name: taskId
+          in: query
+          description: 任务ID
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EcTaskFeedback'
+ /cmd/taskfeedback/tasksupervise:
+    post:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '督办任务反馈信息（含附件）'
+      operationId: superEcTaskFeedback
+      parameters:
+        - name: ecTaskFeedback
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EcTaskFeedbackVo'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /cmd/taskfeedback/{id}:
+    get:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: 获取单条反馈信息
+      operationId: findTaskFeedbackById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/EcTaskFeedback'
+ /cmd/tasks/taskStat:
+    post:
+      tags:
+        - 处置跟踪cmdTrack
+      summary: '根据处置方案ID统计下达任务总条数（包括已下发和已完成状态）和反馈情况总条数-供处置跟踪使用'
+      operationId: statTaskInfo
+      parameters:
+          - name: taskVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                schemeId:
+                  type: string
+                  description: 处置方案ID
+                taskStatus:
+                  type: array
+                  description: 任务状态 0未下发 1已下发 2已完成
+                  items:
+                    type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: object
+                properties:
+                  taskTotalNum:
+                    type: integer
+                  feedbackTotalNum:
+                    type: integer
+#### process 过程再现####
+ /process:
+   post:
+     tags:
+       - 总结评估-过程再现evaProcess
+     summary: '新增过程记录（含附件）'
+     operationId: addProcess
+     parameters:
+       - name: process
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/ProcessVo'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /process/{id}:
+   get:
+     tags:
+       - 总结评估-过程再现evaProcess
+     summary: 获取单条过程记录信息(含附件)
+     operationId: findProcessById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description:  OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/ProcessVo'
+   put:
+     tags:
+       - 总结评估-过程再现evaProcess
+     summary: '修改过程记录信息(手动创建的，含附件)'
+     operationId: updateProcess
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: process
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/ProcessVo'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 总结评估-过程再现evaProcess
+     summary: '删除过程记录(手动创建的)'
+     operationId: deleteProcess
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /process/searchAll:
+   post:
+     tags:
+       - 总结评估-过程再现evaProcess
+     summary: '根据条件查询过程再现记录列表-不分页'
+     operationId: findProcessesAll
+     parameters:
+       - name: eventId
+         in: query
+         required: true
+         type: string
+         description: 事件ID
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ProcessTreeList'
+ /process/searchNodesAll:
+   get:
+     tags:
+       - 总结评估-过程再现evaProcess
+     summary: '查询过程再现记录节点'
+     operationId: findProcesseNodesAll
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ProcessNodeList'
+ #### event eva 事件评估####
+ /eventEva:
+   post:
+     tags:
+       - 总结评估-事件评估evaEventEva
+     summary: '新增事件评估报告，若不是暂存即直接评估完成需要更新事件处置状态'
+     operationId: addEventEvaReport
+     parameters:
+       - name: eventEvaReport
+         in: body
+         required: true
+         schema:
+           properties:
+             saveFlag:
+               type: string
+               description: 提交标识，暂存0，评估完成1
+             data:
+               $ref: '#/definitions/EventEvaReportVo'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /eventEva/evaReport:
+   get:
+     tags:
+       - 总结评估-事件评估evaEventEva
+     summary: 获取单条事件评估报告信息（含各评估细项分数）
+     operationId: findEventEvaReportByEventId
+     parameters:
+       - name: eventId
+         in: query
+         required: true
+         type: string
+     responses:
+       200:
+         description:  OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/EventEvaReport'
+   put:
+     tags:
+       - 总结评估-事件评估evaEventEva
+     summary: '修改事件评估报告信息（含各评估细项分数），若不是暂存即直接评估完成需要更新事件处置状态'
+     operationId: updateEventEvaReport
+     parameters:
+       - name: eventEvaReport
+         in: body
+         required: true
+         schema:
+           properties:
+             saveFlag:
+               type: string
+               description: 提交标识，暂存0，评估完成1
+             data:
+               $ref: '#/definitions/EventEvaReportVo'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+
+ /eventEva/items:
+   get:
+     tags:
+       - 总结评估-评估指标管理
+     summary: 根据事件类型获取事件评估项列表
+     operationId: findEItemsList
+     parameters:
+       - name: eventTypeId
+         in: query
+         description: 事件类型ID
+         type: string
+     responses:
+       200:
+         description:  OK
+         schema:
+           $ref: '#/definitions/EventEvaItemList'
+   post:
+     tags:
+       - 总结评估-评估指标管理
+     summary: '新增事件评估项'
+     operationId: addEventEvaItem
+     parameters:
+       - name: eventEvaItem
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/EventEvaItem'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /eventEva/items/{id}:
+   get:
+     tags:
+       - 总结评估-评估指标管理
+     summary: 获取单条事件评估项信息
+     operationId: findEventEvaItemById
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description:  OK
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               $ref: '#/definitions/EventEvaItem'
+   put:
+     tags:
+       - 总结评估-评估指标管理
+     summary: '修改事件评估项信息'
+     operationId: updateEventEvaItem
+     parameters:
+       - $ref: '#/parameters/id-p'
+       - name: eventEvaItem
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/EventEvaItem'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+   delete:
+     tags:
+       - 总结评估-评估指标管理
+     summary: '删除事件评估项信息'
+     operationId: deleteEventEvaItem
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: OK
+         schema:
+           $ref: '#/definitions/ReturnResult'
+################ definitions#################
+definitions:
+#### accepts ####
+ IMAccept:
+   type: object
+   properties:
+     id:
+       type: string
+     eventName:
+       type: string
+       description: 列表显示
+     position:
+       type: string
+     lonAndLat:
+       type: string
+     occurTime:
+       type: string
+       description: 列表显示
+     eventTypeId:
+       type: string
+     eventTypeName:
+       type: string
+       description: 列表显示
+     eventGradeId:
+       type: string
+     eventGradeName:
+       type: string
+       description: 列表显示
+     reportOrgId:
+       type: string
+     reportOrgName:
+       type: string
+     reporter:
+       type: string
+     reporterTel:
+       type: string
+     methodId:
+       type: string
+     methodName:
+       type: string
+     reportTime:
+       type: string
+       format: date-time
+       description: 列表显示
+     eventCause:
+       type: string
+     eventDesc:
+       type: string
+     protreatment:
+       type: string
+     deathNum:
+       type: integer
+     wondedNum:
+       type: integer
+     request:
+       type: string
+     isFirst:
+       type: string
+       description: 列表显示，是否初报，0初报，1续报
+       enum:
+         - 0
+         - 1
+     firstReportId:
+       type: string
+       description: 首报Id
+     createOrgId:
+       type: string
+       description: 创建单位ID
+ IMAcceptVo:
+   type: object
+   properties:
+     imAccept:
+       $ref: '#/definitions/IMAccept'
+     fileIds:
+       type: array
+       items:
+         type: string
+         description: 接报信息相关附件ID
+     fileDeleteIds:
+       type: array
+       items:
+         type: string
+         description: 删除的附件ID数组
+ IMAcceptList:
+   type: object
+   allOf:
+     - $ref: '#/definitions/ReturnResult'
+   properties:
+     data:
+       type: object
+       properties:
+         totalElements:
+           type: integer
+           description: 记录总数
+         totalPages:
+           type: integer
+           description: 总页数
+         first:
+           type: boolean
+           description: 是否第一页
+         last:
+           type: boolean
+           description: 是否最后一页
+         number:
+           type: integer
+           description: 当前页数，页码从0开始
+         size:
+           type: integer
+           description: 每页记录数
+         sort:
+           type: string
+         numberOfElements:
+           type: integer
+           description: 返回记录条数
+         content:
+           type: array
+           items:
+             $ref: '#/definitions/IMAcceptAll'
+ IMAcceptAll:
+   type: object
+   properties:
+     id:
+       type: string
+     imAccept:
+       $ref: '#/definitions/IMAccept'
+       description: 接报信息详情
+     createOrgId:
+       type: string
+       description: 创建单位ID
+     createOrgName:
+       type: string
+     dealOrgId:
+       type: string
+     dealOrgName:
+       type: string
+     dealFlag:
+       type: string
+       description: 接收后处理状态：0未发送，1已发送，2已退回，3已办结，4已生成事件
+       enum:
+         - 0
+         - 1
+         - 2
+         - 3
+         - 4
+     dealTime:
+       type: string
+       format: 'date-time'
+     returnReason:
+       type: string
+     eventId:
+       type: string
+     dealPersonId:
+       type: string
+     dealPersonName:
+       type: string
+ IMAcceptDeal:
+   type: object
+   properties:
+     id:
+       type: string
+     acceptId:
+       type: string
+       description: 接报信息ID
+     createOrgId:
+       type: string
+       description: 创建单位ID
+     createOrgName:
+       type: string
+     dealOrgId:
+       type: string
+     dealOrgName:
+       type: string
+     dealFlag:
+       type: string
+       description: 接收后处理状态：0未发送，1已发送，2已退回，3已办结，4已生成事件
+       enum:
+         - 0
+         - 1
+         - 2
+         - 3
+         - 4
+     dealTime:
+       type: string
+       format: 'date-time'
+     returnReason:
+       type: string
+     eventId:
+       type: string
+     dealPersonId:
+       type: string
+     dealPersonName:
+       type: string
+  ####AccpetInform####
+ AcceptInform:
+   type: object
+   properties:
+     id:
+       type: string
+     orgName:
+       type: string
+       description: 列表显示
+     orgDuty:
+       type: string
+       description: 列表显示
+     principalId:
+       type: string
+     principal:
+       type: string
+       description: 列表显示
+     principalTel:
+       type: string
+       description: 列表显示
+     eventTypeId:
+       type: string
+     eventTypeName:
+       type: string
+     orders:
+       type: integer
+       description: 排序
+     orderTypeId:
+       type: string
+       description: 指令类型ID
+     orderTypeName:
+       type: string
+       description: 指令类型名称
+  ####AcceptRule####
+ AcceptRule:
+   type: object
+   properties:
+     id:
+       type: string
+     ruleContent:
+       type: string
+       description: 列表显示
+     eventTypeId:
+       type: string
+     eventTypeName:
+       type: string
+     eventDesc:
+       type: string
+       description: 一键事故描述
+     mainPoints:
+       type: string
+       description: 处置事故要点
+#### events ####
+ Event:
+    type: object
+    properties:
+      id:
+        type: string
+#      sourceType:
+#        type: string
+#        description: 事件来源类型：0接报信息，1预警信息
+      eventName:
+        type: string
+        description: 事件名称，列表显示
+      position:
+        type: string
+      lonAndLat:
+        type: string
+      occurTime:
+        type: string
+        format: date-time
+        description: 事发时间，列表显示
+      eventTypeId:
+        type: string
+      eventTypeName:
+        type: string
+        description: 事件类型名称，列表显示
+      eventGradeId:
+        type: string
+      eventGradeName:
+        type: string
+        description: 事件等级名称，列表显示
+      reportOrgId:
+        type: string
+      reportOrgName:
+        type: string
+      reporter:
+        type: string
+      reporterTel:
+        type: string
+      methodId:
+        type: string
+      methodName:
+        type: string
+      reportTime:
+        type: string
+        format: date-time
+      eventCause:
+        type: string
+      eventDesc:
+        type: string
+      protreatment:
+        type: string
+      deathNum:
+        type: integer
+      wondedNum:
+        type: integer
+      request:
+        type: string
+      handleFlag:
+        type: string
+        description: 处置状态 0处置中，1处置结束，2已评估，3已归档 列表显示
+        enum:
+          - 0
+          - 1
+          - 2
+          - 3
+      hBeginTime:
+        type: string
+        format: date-time
+      hEndTime:
+        type: string
+        format: date-time
+ EventList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+       data:
+         type: object
+         properties:
+           totalElements:
+             type: integer
+             description: 记录总数
+           totalPages:
+             type: integer
+             description: 总页数
+           first:
+             type: boolean
+             description: 是否第一页
+           last:
+             type: boolean
+             description: 是否最后一页
+           number:
+             type: integer
+             description: 当前页数，页码从0开始
+           size:
+             type: integer
+             description: 每页记录数
+           sort:
+             type: string
+           numberOfElements:
+             type: integer
+             description: 返回记录条数
+           content:
+             type: array
+             items:
+                $ref: '#/definitions/Event'
+#### cmd ####
+ EventAnalyse:
+    type: object
+    properties:
+      id:
+        type: string
+      eventId:
+        type: string
+      analyseResult:
+        type: string
+        description: 列表显示
+      note:
+        type: string
+      createTime:
+        type: string
+        format: date-time
+        description: 列表显示
+ EventAnalyseVo:
+    type: object
+    properties:
+      eventAnalyse:
+        $ref: '#/definitions/EventAnalyse'
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 分析研判相关附件ID数组
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+ EventLog:
+   type: object
+   properties:
+     id:
+       type: string
+     eventId:
+       type: string
+     eventName:
+       type: string
+     logContent:
+       type: string
+     operator:
+       type: string
+     operatorTime:
+       type: string
+       format: 'date-time'
+ Scheme:
+    type: object
+    properties:
+      id:
+        type: string
+      schemeName:
+        type: string
+        description: 可编辑
+      eventId:
+        type: string
+ EcPlan:
+    type: object
+    properties:
+      id:
+        type: string
+      schemeId:
+        type: string
+      planId:
+        type: string
+      planName:
+        type: string
+ EcEmgOrg:
+    type: object
+    properties:
+      id:
+        type: string
+      schemeId:
+        type: string
+      planId:
+        type: string
+      planOrgId:
+        type: string
+        description: 仅限启动预案保存处置方案时使用
+      name:
+        type: string
+      parentId:
+        type: string
+      orders:
+        type: integer
+        description: 排序号
+      leaf:
+        type: string
+ EcEmgOrgTree:
+    type: object
+    allOf:
+       - $ref: '#/definitions/EcEmgOrg'
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/EcEmgOrgSubTree'
+ EcEmgOrgSubTree:
+    type: object
+    allOf:
+       - $ref: '#/definitions/EcEmgOrg'
+    properties:
+      children:
+        type: array
+        items:
+          $ref: '#/definitions/EcEmgOrg'
+ EcEmgOrgTreeVo:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        $ref: '#/definitions/EcEmgOrgTree'
+ EcOrgRespon:
+     type: object
+     properties:
+       id:
+         type: string
+       emgOrgId:
+         type: string
+       emgOrgName:
+         type: string
+       subjectType:
+         type: string
+         description: 列表显示
+       planResponId:
+         type: string
+       duty:
+         type: string
+         description: 列表显示
+       responsibility:
+         type: string
+       details:
+         type: array
+         items:
+           $ref: '#/definitions/EcOrgResponDetail'
+ EcOrgResponDetail:
+     type: object
+     properties:
+       id:
+         type: string
+       orgResponId:
+         type: string
+       planResDetailId:
+         type: string
+       rspOrgId:
+         type: string
+       repOrgName:
+         type: string
+       principal:
+         type: string
+       principalTel:
+         type: string
+ EcExpert:
+    type: object
+    properties:
+      id:
+        type: string
+      schemeId:
+        type: string
+      planId:
+        type: string
+      expertId:
+        type: string
+      expertName:
+        type: string
+      eventTypeNames:
+        type: string
+      specialty:
+        type: string
+      unit:
+        type: string
+      telephone:
+        type: string
+ EcTeam:
+    type: object
+    properties:
+      id:
+        type: string
+      schemeId:
+        type: string
+      planId:
+        type: string
+      teamId:
+        type: string
+      teamName:
+        type: string
+      teamTypeName:
+        type: string
+      teamAddress:
+        type: string
+      principal:
+        type: string
+      principalTel:
+        type: string
+ Team:
+     type: object
+     properties:
+       id:
+         type: string
+       name:
+         type: string
+         description: 列表显示
+       propertyId:
+         type: string
+       propertyName:
+         type: string
+         description: 列表显示，新增时前端可不传该属性
+       teamTypeId:
+         type: string
+       teamTypeName:
+         type: string
+         description: 列表显示，新增时前端可不传该属性
+       unit:
+         type: string
+         description: 列表显示
+       dutyTel:
+         type: string
+         description: 列表显示
+       principal:
+         type: string
+       principalTel:
+         type: string
+       teamNum:
+         type: integer
+       lonAndLat:
+         type: string
+       address:
+         type: string
+         description: 列表显示
+       specialty:
+         type: string
+         description: 列表显示
+       constituted:
+         type: string
+       materials:
+         type: string
+       teamAbility:
+         type: string
+       teamCase:
+         type: string
+       notes:
+         type: string
+       createOrgId:
+         type: string
+         description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+ EcTeamForGis:
+    type: object
+    properties:
+      "properties ":
+        $ref: '#/definitions/Team'
+        description: 定义的名称为“properties”，其中 经纬度格式为[117.17672795872204,39.21503992227372]
+      type:
+        type: string
+        description: 默认值为“Feature”
+      geometry:
+        type: object
+        properties:
+          type:
+            type: string
+            description: 默认值为“Point”
+          coordinates:
+            type: array
+            description: 经纬度数组，格式为[117.17672795872204,39.21503992227372]
+            items:
+              type: number
+              description: 后台为double类型
+ EcMaterial:
+    type: object
+    properties:
+      id:
+        type: string
+      schemeId:
+        type: string
+      planId:
+        type: string
+      materialId:
+        type: string
+      materialName:
+        type: string
+      resTypeName:
+        type: string
+      unit:
+        type: string
+      unitMeasure:
+        type: string
+      remainingQuantity:
+        type: integer
+      repertoryId:
+        type: string
+        description: 所属库ID
+      repertortyName:
+        type: string
+        description: 所属库名称
+      specModel:
+        type: string
+        description: 规格型号
+ Material:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      code:
+        type: string
+      resTypeId:
+        type: string
+      resTypeName:
+        type: string
+        description: 列表显示
+      lonAndLat:
+        type: string
+      manufacturers:
+        type: string
+      vendorCountry:
+        type: string
+      specModel:
+        type: string
+        description: 列表显示
+      productTime:
+        type: string
+        format: date
+        description: 列表显示
+      expiratTime:
+        type: string
+        format: date
+        description: 列表显示
+      unitMeasure:
+        type: string
+        description: 列表显示
+      unit:
+        type: string
+      notes:
+        type: string
+      initialQuantity:
+        type: string
+        description: 列表显示
+      outsideQuantity:
+        type: string
+        description: 列表显示
+      remainingQuantity:
+        type: string
+        description: 列表显示
+      repertoryId:
+        type: string
+      repertoryName:
+        type: string
+        description: 列表显示
+      positionId:
+        type: string
+      positionName:
+        type: string
+        description: 列表显示
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+ EcMaterialForGis:
+    type: object
+    properties:
+      "properties ":
+        $ref: '#/definitions/Material'
+        description: 定义的名称为“properties”，其中 经纬度格式为[117.17672795872204,39.21503992227372]
+      type:
+        type: string
+        description: 默认值为“Feature”
+      geometry:
+        type: object
+        properties:
+          type:
+            type: string
+            description: 默认值为“Point”
+          coordinates:
+            type: array
+            description: 经纬度，格式为[117.17672795872204,39.21503992227372]
+            items:
+              type: number
+              description: 后台为double类型
+ EcSupport:
+    type: object
+    properties:
+      id:
+        type: string
+      schemeId:
+        type: string
+      planId:
+          type: string
+      supportId:
+        type: string
+      supportName:
+        type: string
+      suppTypeName:
+        type: string
+      address:
+        type: string
+      supportSize:
+        type: string
+      principal:
+        type: string
+      principalTel:
+        type: string
+ Support:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 列表显示
+      typeId:
+        type: string
+      typeName:
+        type: string
+        description: 列表显示，新增时前端可不传该属性
+      address:
+        type: string
+        description: 列表显示
+      lonAndLat:
+        type: string
+      principal:
+        type: string
+      principalTel:
+        type: string
+      supportSize:
+        type: string
+        description: 列表显示
+      capacity:
+        type: integer
+        description: 列表显示
+      describes:
+        type: string
+      notes:
+        type: string
+      createOrgId:
+        type: string
+        description: 列表显示，不用于查询、编辑、查看，只用于过滤是否可以进行编辑、删除——即userOrgId和createOrgId一致时，才可进行编辑、删除
+ EcSupportForGis:
+    type: object
+    properties:
+      "properties ":
+        $ref: '#/definitions/Support'
+        description: 定义的名称为“properties”，其中 经纬度格式为[117.17672795872204,39.21503992227372]
+      type:
+        type: string
+        description: 默认值为“Feature”
+      geometry:
+        type: object
+        properties:
+          type:
+            type: string
+            description: 默认值为“Point”
+          coordinates:
+            type: array
+            description: 经纬度，格式为[117.17672795872204,39.21503992227372]
+            items:
+              type: number
+              description: 后台为double类型
+#### task ####
+ EcTask:
+    type: object
+    properties:
+      id:
+        type: string
+      schemeId:
+        type: string
+      schemeName:
+        type: string
+      eventId:
+        type: string
+      eventName:
+        type: string
+        description: 事件名称，列表显示
+      planTaskId:
+        type: string
+      name:
+        type: string
+        description: 任务标题，列表显示
+      content:
+        type: string
+      startTime:
+        type: string
+        format: date-time
+      endTime:
+        type: string
+        format: date-time
+      taskStatus:
+        type: string
+        description: 任务状态 0未下发，1已下发，2已完成 列表显示
+        enum:
+          - 0
+          - 1
+          - 2
+      createTime:
+        type: string
+        format: date-time
+        description: 创建时间 列表显示
+      createOrgName:
+        type: string
+        description: 创建单位名称 列表显示
+      taskExeorg:
+        $ref: '#/definitions/EcTaskExeorg'
+ EcTaskList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+       data:
+         type: object
+         properties:
+           totalElements:
+             type: integer
+             description: 记录总数
+           totalPages:
+             type: integer
+             description: 总页数
+           first:
+             type: boolean
+             description: 是否第一页
+           last:
+             type: boolean
+             description: 是否最后一页
+           number:
+             type: integer
+             description: 当前页数，页码从0开始
+           size:
+             type: integer
+             description: 每页记录数
+           sort:
+             type: string
+           numberOfElements:
+             type: integer
+             description: 返回记录条数
+           content:
+             type: array
+             items:
+                $ref: '#/definitions/EcTask'
+ EcTaskVo:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+        description: 任务名称
+      taskExeorg:
+        type: string
+        description: 责任部门名称
+      taskSendTime:
+       type: string
+       format: date
+       description: 任务下发时间，格式为yyyy-MM-dd HH:mm:SS
+      taskStatus:
+        type: string
+        description: 任务状态 0未下发，1已下发，2已完成
+        enum:
+          - 0
+          - 1
+          - 2
+      taskFeedback:
+        type: array
+        items:
+          $ref: '#/definitions/EcTaskFeedback'
+        description: 处置跟踪时间轴中每个任务对应的反馈信息列表
+ EcTaskListVo:
+   type: object
+   properties:
+     taskDate:
+       type: string
+       format: date
+       description: 任务下发时间，格式为yyyy-MM-dd.按照时间日期分组
+     tasks:
+       type: array
+       items:
+         $ref: '#/definitions/EcTaskVo'
+         description: 时间轴任务信息对象数组
+ EcTaskExeorg:
+     type: object
+     properties:
+      id:
+        type: string
+      taskId:
+        type: string
+      orgId:
+        type: string
+      orgName:
+        type: string
+        description: 负责单位，列表显示
+      sendTime:
+        type: string
+        format: date-time
+      principal:
+        type: string
+      principalTel:
+        type: string
+ EcTaskFeedback:
+     type: object
+     properties:
+      id:
+        type: string
+      taskId:
+        type: string
+      taskOrgId:
+        type: string
+      content:
+        type: string
+      feedbackBy:
+         type: string
+      feedbackTime:
+         type: string
+         format: date-time
+      completeStatus:
+        type: string
+        description: 是否完成：0否 1是
+        enum:
+          - 0
+          - 1
+      isHaveFiles:
+        type: string
+        description: 是否有附件：0否 1是 只适用于判断有无附件，是否显示下载功能
+        enum:
+          - 0
+          - 1
+      feedbackType:
+        type: string
+        description: 反馈类型：0反馈，1督办，由后台来传
+ EcTaskFeedbackVo:
+   type: object
+   properties:
+     ecTaskFeedback:
+       $ref: '#/definitions/EcTaskFeedback'
+       description: 在反馈时feedbackType为0，在督办时feedbackType为1
+     fileIds:
+       type: array
+       items:
+         type: string
+         description: 任务反馈相关附件ID数组
+     fileDeleteIds:
+       type: array
+       items:
+         type: string
+         description: 删除的附件ID数组
+
+#### process ####
+ Process:
+    type: object
+    properties:
+      id:
+        type: string
+      eventId:
+        type: string
+      eventName:
+        type: string
+      operation:
+        type: string
+      operator:
+        type: string
+      operationTime:
+        type: string
+        format: date-time
+      firstNodeCode:
+        type: string
+      firstNodeName:
+        type: string
+      secNodeCode:
+        type: string
+      secNodeName:
+        type: string
+      processType:
+        type: string
+        description: 0系统自动创建 1人工手动创建
+        enum:
+             - 0
+             - 1
+ ProcessVo:
+   type: object
+   properties:
+     process:
+       $ref: '#/definitions/Process'
+     fileIds:
+       type: array
+       items:
+         type: string
+         description: 过程记录相关附件ID数组
+     fileDeleteIds:
+       type: array
+       items:
+         type: string
+         description: 删除的附件ID数组
+ ProcessTree:
+   type: object
+   properties:
+     id:
+       type: string
+     NodeName:
+       type: string
+     parentId:
+       type: string
+     leaf:
+       type: string
+     orders:
+       type: string
+     status:
+       type: string
+     content:
+       $ref: '#/definitions/ProcessVo'
+ ProcessTreeList:
+   type: object
+   allOf:
+     - $ref: '#/definitions/ReturnResult'
+   properties:
+     data:
+       type: object
+       allOf:
+         - $ref: '#/definitions/ProcessTree'
+       properties:
+         children:
+           type: array
+           items:
+             $ref: '#/definitions/ProcessTree'
+ ProcessNode:
+   type: object
+   properties:
+     id:
+       type: string
+     nodeName:
+       type: string
+     parentId:
+       type: string
+     orders:
+       type: integer
+     leaf:
+       type: string
+ ProcessNodeList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        allOf:
+          - $ref: '#/definitions/ProcessNode'
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/ProcessNode'
+#### event eva ####
+ EventEvaReport:
+   type: object
+   properties:
+     id:
+       type: string
+     eventId:
+       type: string
+       description: 事件ID
+     name:
+       type: string
+       description: 报告名称
+     overallEva:
+       type: string
+       description: 总体评价
+     evaluator:
+       type: string
+       description: 评估人
+     evaluateUnit:
+       type: string
+       description: 评估单位
+     evaluateTime:
+       type: string
+       format: 'date'
+       description: 评估时间
+     totalScore:
+       type: number
+       format: double
+       description: 总成绩
+     resultGrade:
+       type: string
+       description: 结果等级
+     advice:
+       type: string
+       description: 建议
+     notes:
+       type: string
+       description: 备注
+     evaScore:
+       type: array
+       items:
+         $ref: '#/definitions/EventEvaScore'
+ EventEvaReportVo:
+   type: object
+   properties:
+     eventEvaReport:
+       $ref: '#/definitions/EventEvaReport'
+     fileIds:
+       type: array
+       items:
+         type: string
+         description: 评估报告相关附件ID数组
+     fileDeleteIds:
+       type: array
+       items:
+         type: string
+         description: 删除的附件ID数组
+ EventEvaScore:
+    type: object
+    properties:
+      id:
+        type: string
+      reportId:
+        type: string
+        description: 评估报告ID
+      eventEvaItem:
+        type: object
+        $ref: '#/definitions/EventEvaItem'
+      score:
+        type: number
+        format: double
+        description: 分数
+ EventEvaItem:
+    type: object
+    properties:
+      id:
+        type: string
+      orgId:
+        type: string
+      eventTypeId:
+        type: string
+        description: 事件类型ID
+      eventTypeName:
+        type: string
+        description: 事件类型名称
+      name:
+        type: string
+        description: 评估项
+      interpret:
+        type: string
+        description: 评估项说明
+      proportion:
+        type: number
+        format: double
+        description: 权重
+ EventEvaItemList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/EventEvaItem'
+
+##### common model####
+ SearchBody:
+    type: object
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+
+ ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+
+############################ parameters#####################
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string

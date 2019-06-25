@@ -1,0 +1,460 @@
+swagger: '2.0'
+info:
+  description: >-
+    包括日常信息、统计分析、值班信息、天气预报
+  version: 1.0.0
+  title: zn-home浙能首页
+host: 127.0.0.1:8000
+basePath: /zn-home/v1
+tags:
+  - name: 日常信息info
+    description: 预警/事件信息时间轴、预警发布详情展示、事件处置详细展示、预警信息TOP5显示
+  - name: 统计分析stat
+    description: 重大危险源统计、重点防护目标统计、应急专家统计、应急队伍统计、应急物资统计、突发事件及预警统计
+  - name: 监测预警（对外接口）pushAlert
+    description: 对外提供的监测预警接口
+#  - name: 值班信息duty
+#    description: 今日值班信息展示，含集团公司和8个板块
+#  - name: 天气预报weather
+#    description: 近五天的天气预报信息
+
+schemes:
+  - http
+paths:
+####日常信息####
+ /infos/searchAll:
+    post:
+      tags:
+        - 日常信息info
+      summary: '根据条件查询预警/事件信息列表-不分页，并按视图view_alarm_event中的report_time倒序排列'
+      operationId: findInfos
+      parameters:
+        - name: infoVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              topNum:
+                type: integer
+                description: TOP位数
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/ViewAlertEvent'
+##预警详情、预警通知、通知下发及反馈执行情况接口调用alert微服务中的相关接口即可；台风动态是通过接入实时动态数据显示的，目前暂无接入；应急处置界面沿用指挥调度中的即可##
+ /alerts/searchAll:
+    post:
+      tags:
+        - 日常信息info
+      summary: '根据条件查询未处理状态的预警信息列表,并按send_time倒序排列-不分页'
+      operationId: findAlerts
+      parameters:
+        - name: alertVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              alertStatus:
+                type: array
+                description: 预警处理状态（0：未处理；1：已忽略；:2：已通知；3：已办结）
+                items:
+                  type: string
+              topNum:
+                type: integer
+                description: TOP位数
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Alert'
+  ####监测预警对外接口####
+ /alerts/pushAlert:
+   post:
+     tags:
+       - 监测预警（对外接口）pushAlert
+     summary: '推送预警信息'
+     operationId: pushAlert
+     parameters:
+       - name: pushAlert
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/PushAlert'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+
+####统计分析####
+ /stats/statHazards:
+    post:
+      tags:
+        - 统计分析stat
+      summary: '统计各板块不同级别的重大风险源数量'
+      operationId: statHazards
+      parameters:
+          - name: hazardVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                orgCodes:
+                  type: array
+                  items:
+                    type: string
+                    description: 统计各板块单位编码数组，默认为【01,02,03,04,05,06,07,08】，分别代表【电力板块，石油板块，煤炭板块，天然气板块，可再生板块，科服板块，新疆板块，长广集团】
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/HazardStatVo'
+ /stats/statTargets:
+    get:
+      tags:
+        - 统计分析stat
+      summary: '统计重点防护目标各大类数量'
+      operationId: statTargets
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/TargetStatVo'
+ /stats/statExperts:
+    get:
+      tags:
+        - 统计分析stat
+      summary: '统计应急专家各大类数量'
+      operationId: statExperts
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/ExpertStatVo'
+ /stats/statTeams:
+    get:
+      tags:
+        - 统计分析stat
+      summary: '统计应急队伍各大类数量'
+      operationId: statTeams
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/TeamStatVo'
+ /stats/statMaterials:
+    post:
+      tags:
+        - 统计分析stat
+      summary: '统计各板块的应急物资各大类数量'
+      operationId: statMaterials
+      parameters:
+          - name: materialVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                orgCodes:
+                  type: array
+                  items:
+                    type: string
+                    description: 统计各板块单位编码数组，默认为【01,02,03,04,05,06,07,08】，分别代表【电力板块，石油板块，煤炭板块，天然气板块，可再生板块，科服板块，新疆板块，长广集团】
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/MaterialStatVo'
+ /stats/statEvents:
+    post:
+      tags:
+        - 统计分析stat
+      summary: '按月统计本年度发生的突发事件总数和预警总数（突发事件总数按照ec_event表统计所有状态的，预警总数按照ma_alert表里统计2已通知和3已办结状态的）'
+      operationId: statEventAlert
+      parameters:
+          - name: eventVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                statYears:
+                  type: array
+                  items:
+                    type: integer
+                    description: 统计年份数组，格式为yyyy
+                statMonths:
+                  type: array
+                  items:
+                    type: integer
+                    description: 统计月份数组，格式为M
+                alertStatus:
+                  type: array
+                  description: 预警处理状态（0：未处理；1：已忽略；:2：已通知；3：已办结）
+                  items:
+                    type: string
+
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/EventStatVo'
+
+####值班信息####
+##集团和八大板块当日值班信息查询接口调用duty微服务中的相关接口即可##
+
+####天气预报####
+##天气预报信息是通过接入实时气象数据显示的，目前暂无接入##
+
+################ definitions#################
+definitions:
+####日常信息####
+ ViewAlertEvent:
+   type: object
+   properties:
+     id:
+       type: string
+     title:
+       type: string
+     report_time:
+       type: string
+       format: date-time
+     infoType:
+       type: string
+       description: 信息类型：1、预警信息 2、事件信息
+     eventTypeId:
+       type: string
+     eventTypeName:
+       type: string
+ Alert:
+   type: object
+   properties:
+     id:
+       type: string
+     headline:
+       type: string
+     eventTypeId:
+       type: string
+     eventTypeName:
+       type: string
+     severityId:
+       type: string
+     severityName:
+       type: string
+     sendTime:
+       type: string
+       format: date-time
+     alertStatus:
+       type: string
+       description: 预警处理状态（0：未处理；1：已忽略；:2：已通知；3：已办结）
+
+####统计分析####
+ HazardStatVo:
+   type: object
+   properties:
+     danGradeId:
+       type: string
+       description: 危险源级别ID
+     danGradeName:
+       type: string
+       description: 危险源级别名称
+     totalNums:
+       type: array
+       description: 本危险源级别下各业务板块重大危险源数量
+       items:
+         type: integer
+ TargetStatVo:
+   type: object
+   properties:
+     targetTypeId:
+       type: string
+       description: 防护目标类型大类ID
+     targetTypeName:
+       type: string
+       description: 防护目标类型大类名称
+     totalNum:
+       type: integer
+       description: 防护目标总数量
+ ExpertStatVo:
+   type: object
+   properties:
+     eventTypeId:
+       type: string
+       description: 事件类型大类ID
+     eventTypeName:
+       type: string
+       description: 事件类型大类名称
+     totalNum:
+       type: integer
+       description: 应急专家总数量
+ TeamStatVo:
+   type: object
+   properties:
+     teamTypeId:
+       type: string
+       description: 队伍类型大类ID
+     teamTypeName:
+       type: string
+       description: 队伍类型大类名称
+     totalNum:
+       type: integer
+       description: 应急队伍总数量
+ MaterialStatVo:
+   type: object
+   properties:
+     resTypeId:
+       type: string
+       description: 物资类型大类ID
+     resTypeName:
+       type: string
+       description: 物资类型大类名称
+     totalNum:
+       type: array
+       description: 本物资类型大类下各业务板块物资数量
+       items:
+         type: integer
+ EventStatVo:
+   type: object
+   properties:
+#     statYear:
+#       type: integer
+#       description: 统计年份
+#     statMonth:
+#       type: integer
+#       description: 统计月份
+     eventTotalNum:
+       type: array
+       description: 事件数量
+       items:
+         type: integer
+     alertTotalNum:
+       type: array
+       description: 预警数量
+       items:
+         type: integer
+####预警####
+ PushAlert:
+   type: object
+   properties:
+     source:
+       type: string
+       description: 必填项，预警信息来源ID（2：天气预警；3：设备预警）
+     headline:
+       type: string
+       description: 必填项，预警信息的标题
+     eventTypeId:
+       type: string
+       description: 必填项，事件类型ID（10010：台风、暴雨气象灾害；10006：大坝险情）
+     eventTypeName:
+       type: string
+       description: 必填项，事件类型名称
+     severityId:
+       type: string
+       description: 必填项，预警级别ID（1：红色预警；2：橙色预警；3：黄色预警；4：蓝色预警；9：未知）
+     severityName:
+       type: string
+       description: 必填项，预警级别名称
+     description:
+       type: string
+       description: 必填项，预警信息的正文
+     relateCode:
+       type: string
+       description: 预警信息相关编码（台风编码、大坝编码），台风预警和大坝预警为必填项
+     instruction:
+       type: string
+       description: 对建议采取措施的描述
+     areaDesc:
+       type: string
+       description: 对突发事件影响区域的文字描述
+     geoCode:
+       type: string
+       description: 预警信息发布区域的行政区划代码
+     sendTime:
+       type: string
+       format: date-time
+       description: 必填项，预警信息的发布时间
+     alertStatus:
+       type: string
+       description: 必填项，预警处理状态（0：未处理）
+     deviceOrgId:
+       type: string
+       description: 设备所属的组织机构代码，大坝预警为必填项
+     deviceOrgName:
+       type: string
+       description: 设备所属的组织机构名称，大坝预警为必填项
+##### common model####
+ ReturnResult:
+   type: object
+   properties:
+     code:
+       type: integer
+       description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+     msg:
+       type: string

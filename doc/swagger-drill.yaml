@@ -1,0 +1,881 @@
+swagger: '2.0'
+info:
+  description: >-
+    演练计划、演练方案的管理与维护等.
+  version: 1.0.0
+  title: drill演练培训
+host: 127.0.0.1:8000
+basePath: /emp-drill/v1
+tags:
+  - name: 演练计划
+    description: 包括演练计划的制定、编辑、删除、查看、下发、上报、接收、生成方案等功能。
+  - name: 演练方案
+    description: 包括演练方案的制定、编辑、删除、查看、附件上传、下发、上报、接收等功能。
+schemes:
+  - http
+paths:
+#### drillplan 演练计划####
+  /drillplans:
+    post:
+      tags:
+        - 演练计划
+      summary: '新增演练计划'
+      operationId: addDrillPlan
+      parameters:
+        - name: drillPlan
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DrillPlan'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /drillplans/{id}:
+    get:
+        tags:
+          - 演练计划
+        summary: 获取单条演练计划信息
+        operationId: findDrillPlanById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/DrillPlan'
+    put:
+        tags:
+          - 演练计划
+        summary: '修改演练计划信息'
+        operationId: updateDrillPlan
+        parameters:
+          - $ref: '#/parameters/id-p'
+          - name: drillPlan
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/DrillPlan'
+            description: 已上报/下发的计划不可做编辑操作
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+    delete:
+        tags:
+          - 演练计划
+        summary: '删除演练计划'
+        operationId: deleteDrillPlan
+        parameters:
+          - $ref: '#/parameters/id-p'
+        description: 已上报/下发的计划不可做删除操作
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+  /drillplans/search:
+    post:
+        tags:
+          - 演练计划
+        summary: '根据条件查询演练计划列表-分页'
+        operationId: findDrillPlans
+        parameters:
+          - name: drillPlanVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                drillName:
+                  type: string
+                  description: 计划名称
+                partOrgIds:
+                  type: string
+                  description: 演练单位
+                drillStartTime:
+                  type: string
+                  format: date-time
+                  description: 演练时间-开始时间
+                drillEndTime:
+                  type: string
+                  format: date-time
+                  description: 演练时间-结束时间
+                drillWayId:
+                  type: string
+                  description: 演练方式ID
+                orgId:
+                  type: string
+                  description: 制定部门ID，为空时默认为登录用户所属单位ID
+              allOf:
+                - $ref: '#/definitions/SearchBody'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/DrillPlanList'
+  /drillplans/searchRVo:
+    post:
+        tags:
+          - 演练计划
+        summary: '根据条件查询演练计划接收列表-分页'
+        operationId: findDrillPlanRVos
+        parameters:
+          - name: drillPlanVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                drillName:
+                  type: string
+                  description: 计划名称
+                drillStartTime:
+                  type: string
+                  format: date-time
+                  description: 演练时间-开始时间
+                drillEndTime:
+                  type: string
+                  format: date-time
+                  description: 演练时间-结束时间
+                drillWayId:
+                  type: string
+                  description: 演练方式ID
+                orgIds:
+                  type: string
+                  description: 制定部门ID字符串
+                receiveOrgId:
+                  type: string
+                  description: 接收单位ID，默认登录用户所属单位ID进行接收单位过滤。
+              allOf:
+                - $ref: '#/definitions/SearchBody'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/DrillPlanRVoList'
+  /drillplans/send:
+    post:
+      tags:
+        - 演练计划
+      summary: '下发/上报演练计划'
+      operationId: sendDrillPlan
+      parameters:
+        - name: drillPlanSend
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              drillPlanId:
+                type: string
+              sendType:
+                type: string
+                description: 转发类型 0：上报 1:下发
+              orgIdANames:
+                type: array
+                description: 下发/上报的接收部门的ID和名称，数组
+                items:
+                  type: object
+                  properties:
+                    orgId:
+                      type: string
+                    orgName:
+                      type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /drillplans/receive:
+    post:
+      tags:
+        - 演练计划
+      summary: '接收演练计划'
+      operationId: receiveDrillPlan
+      parameters:
+        - name: drillPlanReceive
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              drillPlanId:
+                type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /drillplans/receive/searchAll:
+    post:
+        tags:
+          - 演练计划
+        summary: '根据条件查询计划接收部门的接收状态信息列表-不分页'
+        operationId: findPlanSendAll
+        parameters:
+          - name: planSendVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                drillPlanId:
+                  type: string
+                  description: 演练计划ID
+                sendType:
+                  type: string
+                  description: 前端输入参数，转发类型 0：上报 1:下发
+        responses:
+          200:
+            description: OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/DrillPlanReceive'
+#### drillscheme 演练方案 ####
+  /drillschemes:
+    post:
+      tags:
+        - 演练方案
+      summary: '新增演练方案（含附件）'
+      operationId: addDrillScheme
+      parameters:
+        - name: drillScheme
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/DrillSchemeVo'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /drillschemes/{id}:
+    get:
+        tags:
+          - 演练方案
+        summary: 获取单条演练方案信息
+        operationId: findDrillSchemeById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/DrillScheme'
+    put:
+        tags:
+          - 演练方案
+        summary: '修改演练方案信息（含附件）'
+        operationId: updateDrillScheme
+        parameters:
+          - $ref: '#/parameters/id-p'
+          - name: drillScheme
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/DrillSchemeVo'
+            description: 已上报/下发的方案不可做编辑操作
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+    delete:
+        tags:
+          - 演练方案
+        summary: '删除演练方案'
+        operationId: deleteDrillScheme
+        parameters:
+          - $ref: '#/parameters/id-p'
+        description: 已上报/下发的方案不可做删除操作
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+  /drillschemes/search:
+    post:
+        tags:
+          - 演练方案
+        summary: '根据条件查询演练方案列表-分页'
+        operationId: findDrillSchemes
+        parameters:
+          - name: drillSchemeVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                drillName:
+                  type: string
+                  description: 方案名称
+                drillStartTime:
+                  type: string
+                  format: date-time
+                  description: 创建时间-开始时间
+                drillEndTime:
+                  type: string
+                  format: date-time
+                  description: 创建时间-结束时间
+                summary:
+                  type: string
+                  description: 方案概要
+                orgId:
+                  type: string
+                  description: 制定部门ID，为空时默认为登录用户所属单位ID
+              allOf:
+                - $ref: '#/definitions/SearchBody'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/DrillSchemeList'
+  /drillschemes/searchRVo:
+    post:
+        tags:
+          - 演练方案
+        summary: '根据条件查询演练方案接收列表-分页'
+        operationId: findDrillSchemeRVos
+        parameters:
+          - name: drillSchemeVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                drillName:
+                  type: string
+                  description: 方案名称
+                drillStartTime:
+                  type: string
+                  format: date-time
+                  description: 创建时间-开始时间
+                drillEndTime:
+                  type: string
+                  format: date-time
+                  description: 创建时间-结束时间
+                orgIds:
+                  type: string
+                  description: 制定部门ID字符串
+                receiveOrgId:
+                  type: string
+                  description: 接收单位ID，默认登录用户所属单位ID进行接收单位过滤。
+              allOf:
+                - $ref: '#/definitions/SearchBody'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/DrillSchemeRVoList'
+  /drillschemes/send:
+    post:
+      tags:
+        - 演练方案
+      summary: '下发/上报演练方案'
+      operationId: sendDrillScheme
+      parameters:
+        - name: drillSchemeSend
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              drillSchemeId:
+                type: string
+              sendType:
+                type: string
+                description: 转发类型 0：上报 1:下发
+              orgIdANames:
+                type: array
+                description: 下发/上报的接收部门的ID和名称，数组
+                items:
+                  type: object
+                  properties:
+                    orgId:
+                      type: string
+                    orgName:
+                      type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /drillschemes/receive:
+    post:
+      tags:
+        - 演练方案
+      summary: '接收演练方案'
+      operationId: receiveDrillScheme
+      parameters:
+        - name: drillSchemeReceive
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              drillSchemeId:
+                type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /drillschemes/receive/searchAll:
+    post:
+        tags:
+          - 演练方案
+        summary: '根据条件查询方案接收部门的接收状态信息列表-不分页'
+        operationId: findSchemeSendAll
+        parameters:
+          - name: schemeSendVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                drillSchemeId:
+                  type: string
+                  description: 演练方案ID
+                sendType:
+                  type: string
+                  description: 前端输入参数，转发类型 0：上报 1:下发
+        responses:
+          200:
+            description: OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/DrillSchemeReceive'
+
+################ definitions#################
+definitions:
+#### drillplan 演练计划 ####
+  DrillPlan:
+    type: object
+    properties:
+      id:
+        type: string
+      drillName:
+        type: string
+        description: 计划名称，列表显示
+      drillWayId:
+        type: string
+      drillWayName:
+        type: string
+        description: 演练方式，列表显示
+      drillTime:
+        type: string
+        format: date-time
+        description: 演练时间，列表显示
+      drillPlace:
+        type: string
+        description: 演练地点，列表显示
+      partOrgIds:
+        type: string
+        description: 参与单位ID字符串，以逗号隔开
+      partOrgNames:
+        type: string
+        description: 参与单位名称字符串，以逗号隔开，列表显示
+      content:
+        type: string
+      epPlanIds:
+        type: string
+        description: 相关预案ID字符串，以逗号隔开
+      epPlanNames:
+        type: string
+        description: 相关预案名称字符串，以逗号隔开，列表显示
+      notes:
+        type: string
+      sendStatus:
+        type: string
+        description: 下发状态0.未下发1.已下发 列表显示
+        enum:
+             - 0
+             - 1
+      reportStatus:
+        type: string
+        description: 上报状态0.未上报1.已上报 列表显示
+        enum:
+             - 0
+             - 1
+      orgId:
+        type: string
+        description: 创建单位ID，默认为当前登录用户所属单位ID
+      orgName:
+        type: string
+        description: 创建单位名称，默认为当前登录用户所属单位名称 接收TAB列表显示
+  DrillPlanRVo:
+    type: object
+    properties:
+      drillPlan:
+          $ref: '#/definitions/DrillPlan'
+      sendTime:
+        type: string
+        format: date-time
+        description: 发送时间，列表显示
+      reciever:
+        type: string
+        description: 接收人，列表显示
+      recieveTime:
+        type: string
+        format: date-time
+        description: 接收时间，列表显示
+      recieveStatus:
+        type: string
+        description: 0:未接收，1:已接收 列表显示
+        enum:
+             - 0
+             - 1
+  DrillPlanList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+       data:
+         type: object
+         properties:
+           totalElements:
+             type: integer
+             description: 记录总数
+           totalPages:
+             type: integer
+             description: 总页数
+           first:
+             type: boolean
+             description: 是否第一页
+           last:
+             type: boolean
+             description: 是否最后一页
+           number:
+             type: integer
+             description: 当前页数，页码从0开始
+           size:
+             type: integer
+             description: 每页记录数
+           sort:
+             type: string
+           numberOfElements:
+             type: integer
+             description: 返回记录条数
+           content:
+             type: array
+             items:
+                $ref: '#/definitions/DrillPlan'
+  DrillPlanRVoList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+       data:
+         type: object
+         properties:
+           totalElements:
+             type: integer
+             description: 记录总数
+           totalPages:
+             type: integer
+             description: 总页数
+           first:
+             type: boolean
+             description: 是否第一页
+           last:
+             type: boolean
+             description: 是否最后一页
+           number:
+             type: integer
+             description: 当前页数，页码从0开始
+           size:
+             type: integer
+             description: 每页记录数
+           sort:
+             type: string
+           numberOfElements:
+             type: integer
+             description: 返回记录条数
+           content:
+             type: array
+             items:
+                $ref: '#/definitions/DrillPlanRVo'
+  DrillPlanReceive:
+    type: object
+    properties:
+      id:
+        type: string
+      drillPlanId:
+        type: string
+      sendType:
+        type: string
+        description: 0:上报，1:下发
+        enum:
+             - 0
+             - 1
+      sendTime:
+        type: string
+        format: date-time
+        description: 发送时间，列表显示
+      orgId:
+        type: string
+      orgName:
+        type: string
+        description: 接收单位名称，列表显示
+      reciever:
+        type: string
+        description: 接收人，列表显示
+      recieveTime:
+        type: string
+        format: date-time
+        description: 接收时间，列表显示
+      recieveStatus:
+        type: string
+        description: 0:未接收，1:已接收 列表显示
+        enum:
+             - 0
+             - 1
+
+#### drillscheme 演练方案 ####
+  DrillScheme:
+    type: object
+    properties:
+      id:
+        type: string
+      drillPlanId:
+        type: string
+      drillPlanName:
+        type: string
+      drillName:
+        type: string
+        description: 方案名称，列表显示
+      summary:
+        type: string
+        description: 方案摘要，列表显示
+      epPlanIds:
+        type: string
+        description: 相关预案ID字符串，以逗号隔开
+      epPlanNames:
+        type: string
+        description: 相关预案名称字符串，以逗号隔开
+      sendStatus:
+        type: string
+        description: 下发状态0.未下发1.已下发，列表显示
+        enum:
+             - 0
+             - 1
+      reportStatus:
+        type: string
+        description: 上报状态0.未上报1.已上报，列表显示
+        enum:
+             - 0
+             - 1
+      orgId:
+        type: string
+        description: 创建单位ID，为空时默认为当前登录用户所属单位ID
+      orgName:
+        type: string
+        description: 创建单位名称，为空时默认为当前登录用户所属单位名称，列表显示
+      createBy:
+        type: string
+        description: 创建人，默认为当前登录用户，列表显示
+      createTime:
+        type: string
+        format: date-time
+        description: 创建时间，列表显示
+  DrillSchemeVo:
+      type: object
+      properties:
+        knowledge:
+          $ref: '#/definitions/DrillScheme'
+        fileIds:
+          type: array
+          items:
+            type: string
+            description: 演练方案相关附件ID数组
+        fileDeleteIds:
+          type: array
+          items:
+            type: string
+            description: 删除的附件ID数组
+  DrillSchemeRVo:
+    type: object
+    properties:
+      drillPlan:
+          $ref: '#/definitions/DrillScheme'
+      sendTime:
+        type: string
+        format: date-time
+        description: 发送时间，列表显示
+      reciever:
+        type: string
+        description: 接收人，列表显示
+      recieveTime:
+        type: string
+        format: date-time
+        description: 接收时间，列表显示
+      recieveStatus:
+        type: string
+        description: 0:未接收，1:已接收 列表显示
+        enum:
+             - 0
+             - 1
+  DrillSchemeList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+       data:
+         type: object
+         properties:
+           totalElements:
+             type: integer
+             description: 记录总数
+           totalPages:
+             type: integer
+             description: 总页数
+           first:
+             type: boolean
+             description: 是否第一页
+           last:
+             type: boolean
+             description: 是否最后一页
+           number:
+             type: integer
+             description: 当前页数，页码从0开始
+           size:
+             type: integer
+             description: 每页记录数
+           sort:
+             type: string
+           numberOfElements:
+             type: integer
+             description: 返回记录条数
+           content:
+             type: array
+             items:
+                $ref: '#/definitions/DrillScheme'
+  DrillSchemeRVoList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+       data:
+         type: object
+         properties:
+           totalElements:
+             type: integer
+             description: 记录总数
+           totalPages:
+             type: integer
+             description: 总页数
+           first:
+             type: boolean
+             description: 是否第一页
+           last:
+             type: boolean
+             description: 是否最后一页
+           number:
+             type: integer
+             description: 当前页数，页码从0开始
+           size:
+             type: integer
+             description: 每页记录数
+           sort:
+             type: string
+           numberOfElements:
+             type: integer
+             description: 返回记录条数
+           content:
+             type: array
+             items:
+                $ref: '#/definitions/DrillSchemeRVo'
+  DrillSchemeReceive:
+    type: object
+    properties:
+      id:
+        type: string
+      drillSchemeId:
+        type: string
+      sendType:
+        type: string
+        description: 0:上报，1:下发
+        enum:
+             - 0
+             - 1
+      sendTime:
+        type: string
+        format: date-time
+        description: 发送时间，列表显示
+      orgId:
+        type: string
+      orgName:
+        type: string
+        description: 接收单位名称，列表显示
+      reciever:
+        type: string
+        description: 接收人，列表显示
+      recieveTime:
+        type: string
+        format: date-time
+        description: 接收时间，列表显示
+      recieveStatus:
+        type: string
+        description: 0:未接收，1:已接收 列表显示
+        enum:
+             - 0
+             - 1
+
+##### common model####
+  SearchBody:
+    type: object
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+
+############################ parameters#####################
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string

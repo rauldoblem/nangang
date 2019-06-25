@@ -1,0 +1,8 @@
+package com.taiji.emp.drill.feign;
+
+import com.taiji.micro.common.feign.IUtilsRestService;
+import org.springframework.cloud.netflix.feign.FeignClient;
+
+@FeignClient(value="base-server-zuul/micro-emp-drill",path = "api/utils")
+public interface UtilsFeignClient extends IUtilsRestService {
+}

@@ -1,0 +1,249 @@
+swagger: '2.0'
+info:
+  description: >-
+    系统附件上传、显示、下载、删除等。
+  version: 1.0.0
+  title: file附件服务
+host: 127.0.0.1:8000
+basePath: /file/v1
+
+schemes:
+  - http
+paths:
+ /files/uploadSingle:
+   post:
+     summary: '单附件上传'
+     operationId: uploadSingle
+     consumes:
+       - multipart/form-data
+     parameters:
+       - name: singleFile
+         in: formData
+         required: true
+         type: file
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: object
+               $ref: '#/definitions/DocAttachment'
+ /files/uploadMultiple:
+   post:
+     summary: '多附件上传'
+     operationId: uploadMultiple
+     consumes:
+       - multipart/form-data
+     parameters:
+       - name: mulFiles
+         in: formData
+         required: true
+         schema:
+           type: array
+           items:
+             type: file
+     responses:
+       200:
+         description: ok
+         schema:
+           type: object
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/DocAttachment'
+ /files/show:
+   get:
+     summary: '附件显示'
+     operationId: showFile
+     parameters:
+       - name: source
+         in: path
+         required: true
+         description: 模块名称、上下文
+         type: string
+       - name: location
+         in: path
+         required: true
+         type: string
+         description: 附件相对路径
+     responses:
+       200:
+         description: ok
+         schema:
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: string
+               description: showLocation
+ /files/{id}:
+   get:
+     summary: '获取主体对应附件清单'
+     operationId: findFilesById
+     parameters:
+       - name: id
+         in: path
+         required: true
+         type: string
+         description: 主体ID，非附件ID
+     responses:
+       200:
+         description: ok
+         schema:
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: array
+               items:
+                 $ref: '#/definitions/DocAttachment'
+   delete:
+     summary: '删除附件'
+     operationId: deleteFile
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+ /files/downloadFile/{id}:
+   get:
+     summary: '附件下载'
+     operationId: downloadFile
+     produces:
+       - 'image/*'
+       - 'application/*'
+       - 'audio/*'
+       - 'text/*'
+       - 'video/*'
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: file
+ /files/downloadZipFile/{entityId}:
+   get:
+     summary: '打包下载附件'
+     operationId: downloadZipFile
+     produces:
+       - application/zip
+     parameters:
+       - name: entityId
+         in: path
+         required: true
+         type: string
+     responses:
+       200:
+         description: ok
+         schema:
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: file
+ /files/getDoc/{id}:
+   get:
+     summary: '根据附件ID获取附件实体'
+     operationId:
+     parameters:
+       - $ref: '#/parameters/id-p'
+     responses:
+       200:
+         description: ok
+         schema:
+           allOf:
+             - $ref: '#/definitions/ReturnResult'
+           properties:
+             data:
+               type: object
+               $ref: '#/definitions/DocAttachment'
+ /files/saveDocEntity:
+   post:
+     summary: '保存业务对象时，更新附件表'
+     operationId:
+     parameters:
+       - name: entityDocMidVo
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/EntityDocMidVo'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+
+definitions:
+  DocAttachment:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 主键
+      fileName:
+        type: string
+        description: 文件名称
+      location:
+        type: string
+        description: 相对路径
+      fileType:
+        type: string
+        description: 文件类型
+  EntityDocMidVo:
+    type: object
+    properties:
+      entityId:
+        type: string
+        description: 业务对象ID
+      docAttIds:
+        type: array
+        description: 业务对象对应的附件ID组
+        items:
+          type: string
+      docAttDelIds:
+        type: array
+        description: 业务对象已删除的附件ID组
+        items:
+          type: string
+##### common model####
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000 操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+
+#### parameters####
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 附件主键ID
+    type: string
+
+
+

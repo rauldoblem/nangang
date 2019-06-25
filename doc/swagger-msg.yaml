@@ -1,0 +1,164 @@
+swagger: '2.0'
+info:
+  description: >-
+    系统消息提示、通知、待办等.
+  version: 1.0.0
+  title: MSG消息管理
+host: 127.0.0.1:8000
+basePath: /msg/v1
+tags:
+  - name: 通知管理
+    description: 系统消息通知管理
+  - name: 待办服务
+    description: 系统待办信息服务
+schemes:
+  - http
+paths:
+#### notices ####
+  /notices:
+    get:
+      tags:
+      - 通知管理
+      summary: '根据当前用户账号，获取通知消息列表'
+      operationId: findNotices
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+            - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Notice'
+    post:
+      tags:
+      - 通知管理
+      summary: '新增消息'
+      operationId: addNotice
+      parameters:
+      - name: notice
+        in: body
+        required: true
+        schema:
+          $ref: '#/definitions/Notice'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /notices/clear:
+    post:
+      tags:
+      - 通知管理
+      summary: 消息通知已读、清空展示所有消息
+      operationId: clearNotices
+      parameters:
+      - name: noticeRecords
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            recordIds:
+              type: array
+              items:
+                type: string
+      responses:
+        200:
+          description:  OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /todos:
+    get:
+      tags:
+        - 待办服务
+      summary: 根据当前用户账号，获取待办统计数据
+      operationId: todos
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+            - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    icon:
+                      type: string
+                    typeName:
+                      type: string
+                    path:
+                      type: string
+                    number:
+                      type: integer
+################ definitions#################
+definitions:
+#### notice ####
+  NoticeRecord:
+    type: object
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      sendOrg:
+        type: string
+      orgName:
+        type: string
+      msgContent:
+        type: string
+      msgType:
+        type: string
+      typeName:
+        type: string
+      icon:
+        type: string
+      path:
+        type: string
+      receiverId:
+        type: string
+      receiverName:
+        type: string
+      readFlag:
+        type: string
+      readTime:
+        type: string
+        format: 'date-time'
+      createBy:
+        type: string
+      createTime:
+        type: string
+        format: 'date-time'
+      entityId:
+        type: string
+##### common model####
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+############################ parameters#####################
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string

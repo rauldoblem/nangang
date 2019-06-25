@@ -1,0 +1,800 @@
+swagger: '2.0'
+info:
+  description: >-
+    监测预警
+  version: 1.0.0
+  title: alert监测预警服务
+host: 127.0.0.1:8600
+basePath: /emp-alert/v1
+tags:
+  - name: 监测预警管理alert
+    description: 监测预警信息管理
+
+schemes:
+  - http
+paths:
+
+####监测预警####
+  /alerts:
+    post:
+     tags:
+       - 监测预警管理alert
+     summary: '新增预警信息'
+     operationId: addAlert
+     parameters:
+       - name: alert
+         in: body
+         required: true
+         schema:
+           $ref: '#/definitions/AlertVo'
+     responses:
+       200:
+         description: ok
+         schema:
+           $ref: '#/definitions/ReturnResult'
+  /alerts/{id}:
+    put:
+      tags:
+         - 监测预警管理alert
+      summary: '修改预警信息'
+      operationId: updateAlert
+      parameters:
+        - $ref: '#/parameters/id-p'
+        - name: alert
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AlertVo'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+         - 监测预警管理alert
+      summary: '获取单条预警信息'
+      operationId: findAlertById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/Alert'
+    delete:
+          tags:
+             - 监测预警管理alert
+          summary: '删除预警信息'
+          operationId: deleteAlert
+          parameters:
+            - $ref: '#/parameters/id-p'
+          responses:
+            200:
+              description: ok
+              schema:
+                $ref: '#/definitions/ReturnResult'
+  /alerts/search:
+    post:
+      tags:
+        - 监测预警管理alert
+      summary: '根据条件查询预警信息列表-分页'
+      operationId: findAlerts
+      parameters:
+        - name: alertsVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              headline:
+                type: string
+              severityId:
+                type: string
+              eventTypeIds:
+                type: array
+                items:
+                  type: string
+              source:
+                type: string
+              sendStartTime:
+                type: string
+                format: date
+              sendEndTime:
+                type: string
+                format: date
+              noticeFlags:
+                type: array
+                items:
+                  type: string
+                description: 原来为alertStatus。 待办：【0：未处理】and  is_notice=1；已办：【1：已忽略；2：处置中；3：办结】 or is_notice=0
+              orgId:
+                type: string
+                description: 单位ID，即当前用户所属单位ID
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/AlertList'
+  /alerts/send:
+    post:
+      tags:
+        - 监测预警管理alert
+      summary: '预警通知，后台将is_notice标志位改为0已通知'
+      operationId: sendAlert
+      parameters:
+        - name: sendAlertVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              orgIds:
+                type: array
+                items:
+                  type: string
+              alertId:
+                type: string
+
+#              require:
+#                type: string
+#              alertStatus:
+#                type: string
+#                description: 预警处理状态（1：已忽略；2：处置中；3：已办结）
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /alerts/deal:
+    post:
+      tags:
+        - 监测预警管理alert
+      summary: '【20190104浙能新增】预警信息处理，包括忽略、处置、办结'
+      operationId: dealAlert
+      parameters:
+        - name: dealAlertVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              alertId:
+                type: string
+              alertStatus:
+                type: string
+                description: 预警处理状态（1：已忽略；2：处置中；3：已办结）
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /alerts/alertNotice/{alertId}:
+    get:
+      tags:
+        - 监测预警管理alert
+      summary: '预警通知追加，附件不可编辑'
+      operationId: alertNotice
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          type: string
+          description: 预警信息ID
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/AlertNoticeVo'
+  /alerts/viewAlertFeedbacks/{alertId}:
+    get:
+      tags:
+        - 监测预警管理alert
+      summary: '预警通知反馈查看'
+      operationId: viewFeedbackList
+      parameters:
+        - name: alertId
+          in: path
+          required: true
+          type: string
+          description: 预警信息ID
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: object
+                $ref: '#/definitions/AlertNoticeFbTotalVo'
+  /alerts/recSearch:
+    post:
+      tags:
+        - 监测预警管理alert
+      summary: '根据条件查询本单位接收的预警通知列表-分页'
+      operationId: findRecAlerts
+      parameters:
+        - name: alertsVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              headline:
+                type: string
+              severityId:
+                type: string
+              eventTypeIds:
+                type: array
+                items:
+                  type: string
+              source:
+                type: string
+              sendStartTime:
+                type: string
+                format: date
+              sendEndTime:
+                type: string
+                format: date
+              revOrgId:
+                type: string
+                description: 接收单位ID，即当前用户所属单位ID
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/AlertNoticeList'
+  /alerts/viewRecFeedbacks/{alertRecId}:
+    get:
+      tags:
+        - 监测预警管理alert
+      summary: '接收的预警通知查看'
+      operationId: viewNoticeRec
+      parameters:
+        - name: alertRecId
+          in: path
+          required: true
+          type: string
+          description: 预警通知接收ID
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/AlertRecFeedback'
+  /alerts/feedback:
+    post:
+      tags:
+        - 监测预警管理alert
+      summary: '预警通知反馈，保存同时，修改接收表中的最新反馈状态、最近反馈内容、最近反馈时间'
+      operationId: feedbackAlert
+      parameters:
+        - name: feedbackAlert
+          in: body
+          required: true
+          schema:
+           $ref: '#/definitions/AlertFeedbackVo'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /alerts/feedbackForOthers:
+    post:
+      tags:
+        - 监测预警管理alert
+      summary: '【2019年1月7日浙能新增】预警通知代为反馈，保存同时，修改接收表中的最新反馈状态、最近反馈内容、最近反馈时间'
+      operationId: feedbackForOthers
+      parameters:
+        - name: feedbackForOthersVo
+          in: body
+          required: true
+          type: object
+          schema:
+            $ref: '#/definitions/AlertFeedbackForOthersVo'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /alerts/getAllOrgsAndFeedback/{alarmId}:
+    get:
+      tags:
+        - 监测预警管理alert
+      summary: '【2018-12-22 add】获取该条预警信息下发的单位列表及各单位的反馈情况、附件,供浙能首页使用'
+      operationId: getAllOrgsAndFeedback
+      parameters:
+        - name: alarmId
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: ok
+          schema:
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/AlertRecAndFeedbackList'
+  /alerts/getReceiverListByAlertId:
+    get:
+      tags:
+        - 监测预警管理alert
+      summary: ‘【20190104浙能新增】通过预警信息ID获取改预警信息已经通知的单位列表’
+      operationId: getReceiverListByAlertId
+      parameters:
+        - name: alertId
+          in: query
+          required: true
+          type: string
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    orgId:
+                      type: string
+                    orgName:
+                      type: string
+################ definitions#################
+definitions:
+####Alert####
+  AlertVo:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      source:
+        type: string
+        description: 列表显示，预警信息来源（1：系统录入，2：天气预警，3：设备预警）
+      headline:
+        type: string
+        description: 列表显示
+      eventTypeId:
+        type: string
+      eventTypeName:
+        type: string
+        description: 列表显示
+      severityId:
+        type: string
+      severityName:
+        type: string
+        description: 列表显示
+      description:
+        type: string
+      instruction:
+        type: string
+      areaDesc:
+        type: string
+      geoCode:
+        type: string
+      sendTime:
+        type: string
+        format: date-time
+        description: 列表显示
+      effective:
+        type: string
+        format: date-time
+      alertStatus:
+        type: string
+        description: 列表显示，预警处理状态改为（0：未处理；1：已忽略；2：处置中；3：已办结）
+#      require:
+#        type: string
+      createOrgId:
+        type: string
+      createOrgName:
+        type: string
+      relate_code:
+        type: string
+        description: 本预警关联的台风编码
+      isNotice:
+        type: string
+        description: 是否通知（0：已通知；1：未通知）
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 通知相关附件ID数组
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+  Alert:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      source:
+        type: string
+        description: 列表显示，预警信息来源（1：系统录入，2：天气预警，3：设备预警）
+      headline:
+        type: string
+        description: 列表显示
+      eventTypeId:
+        type: string
+      eventTypeName:
+        type: string
+        description: 列表显示
+      severityId:
+        type: string
+      severityName:
+        type: string
+        description: 列表显示
+      description:
+        type: string
+      instruction:
+        type: string
+      areaDesc:
+        type: string
+      geoCode:
+        type: string
+      sendTime:
+        type: string
+        format: date-time
+        description: 列表显示
+      effective:
+        type: string
+        format: date-time
+      alertStatus:
+        type: string
+        description: 列表显示，预警处理状态改为（0：未处理；1：已忽略；2：处置中；3：已办结）
+#      require:
+#        type: string
+      createOrgId:
+        type: string
+      createOrgName:
+        type: string
+      relate_code:
+        type: string
+        description: 本预警关联的台风编码
+      isNotice:
+        type: string
+        description: 是否通知（0：已通知；1：未通知）
+  AlertList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Alert'
+  AlertReceiveOrg:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      alertId:
+        type: string
+      receiveOrgId:
+        type: string
+      receiveOrgName:
+        type: string
+        description: 列表显示
+#      require:
+#        type: string
+#        description: 预警要求通知内容
+      noticeTime:
+        type: string
+        format: 'date-time'
+        description: 通知下发时间
+      feedbackContent:
+        type: string
+        description: 列表显示，最新反馈内容
+      feedbackLasttime:
+        type: string
+        format: date-time
+        description: 列表显示，最新反馈时间
+      feedbackStatus:
+        type: string
+        description: 列表显示，最新反馈状态
+  AlertNoticeList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/AlertAndNotice'
+  AlertAndNotice:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      alert:
+        type: object
+        $ref: '#/definitions/Alert'
+      receiveOrgId:
+        type: string
+      receiveOrgName:
+        type: string
+        description: 列表显示
+#      require:
+#        type: string
+#        description: 预警要求通知内容
+      noticeTime:
+        type: string
+        format: 'date-time'
+        description: 通知下发时间
+      feedbackContent:
+        type: string
+        description: 列表显示，最新反馈内容
+      feedbackLasttime:
+        type: string
+        format: date-time
+        description: 列表显示，最新反馈时间
+      feedbackStatus:
+        type: string
+        description: 列表显示，最新反馈状态
+  AlertFeedback:
+    type: object
+    properties:
+      id:
+        type: string
+      alertReceiveId:
+        type: string
+      feedbackBy:
+        type: string
+      content:
+        type: string
+      question:
+        type: string
+      feedbackTime:
+        type: string
+        format: date-time
+  AlertNoticeVo:
+    type: object
+    properties:
+      alert:
+          $ref: '#/definitions/Alert'
+      content:
+        type: string
+      receiveOrgNameStr:
+        type: string
+      receiveOrgIds:
+       type: array
+       items:
+         type: string
+  AlertNoticeFbTotalVo:
+    type: object
+    properties:
+      alert:
+          $ref: '#/definitions/Alert'
+      alertReceiveOrgsVo:
+          $ref: '#/definitions/AlertReceiveOrgsVo'
+      statistic:
+          $ref: '#/definitions/NoticeFbStatVo'
+      alertFeedbacks:
+            type: array
+            items:
+              $ref: '#/definitions/AlertFeedbacks'
+  AlertReceiveOrgsVo:
+    type: object
+    properties:
+      receiveOrgs:
+        type: string
+#      content:
+#        type: string
+  NoticeFbStatVo:
+    type: object
+    properties:
+      total:
+        type: string
+      complete:
+        type: string
+      progress:
+        type: string
+      start:
+        type: string
+  AlertFeedbacks:
+    type: object
+    properties:
+      receiveOrgName:
+        type: string
+      content:
+        type: string
+      feedbackLasttime:
+        type: string
+        format: date-time
+      feedbackStatus:
+        type: string
+      feedbackIds:
+       type: array
+       items:
+         type: string
+  AlertFeedbackVo:
+    type: object
+    properties:
+      id:
+        type: string
+      alertReceiveId:
+        type: string
+      content:
+        type: string
+      feedbackBy:
+        type: string
+      feedbackStatus:
+        type: string
+      question:
+        type: string
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 相关附件ID数组
+  AlertFeedbackForOthersVo:
+    type: object
+    properties:
+      alertId:
+        type: string
+      receiveOrgId:
+        type: string
+      content:
+        type: string
+      feedbackBy:
+        type: string
+      feedbackStatus:
+        type: string
+      question:
+        type: string
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 相关附件ID数组
+  AlertRecFeedback:
+    type: object
+    properties:
+      alertReceiveOrg:
+          $ref: '#/definitions/AlertAndNotice'
+      alertFeedbacks:
+        type: array
+        items:
+          $ref: '#/definitions/AlertFeedback'
+  AlertRecAndFeedbackList:
+    type: object
+    properties:
+      id:
+        type: string
+      receiveOrgId:
+        type: string
+      receiveOrgName:
+        type: string
+      feedbackStatus:
+        type: string
+      feedbacks:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            feedbackBy:
+              type: string
+            content:
+              type: string
+            question:
+              type: string
+            feedbackTime:
+              type: string
+              format: 'date-time'
+
+  ##### common model####
+  SearchBody:
+    type: object
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+
+############################ parameters#####################
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string

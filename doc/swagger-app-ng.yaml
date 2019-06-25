@@ -1,0 +1,1341 @@
+swagger: '2.0'
+info:
+  description: >-
+     移动端对应接口.
+  version: 1.0.0
+  title: appNg小程序
+host: 127.0.0.1:8000
+basePath: /emp-app-ng/v1
+
+tags:
+  - name: 首页homePage
+    description: 首页值班信息、通知信息
+  - name: 事件上报infoReport
+    description: 通过小程序上报的事件列表、事件上报
+  - name: 任务管理taskManagement
+    description: 接收任务的反馈及历史查看
+  - name: 个人信息personalInfo
+    description: 个人信息查看
+
+schemes:
+  - http
+paths:
+  ####首页####
+  /appNg/getDutysByDate:
+    get:
+      tags:
+        - '首页homePage'
+      summary: '根据日期获取当天的所有值班人员列表，包括领导和值班员等，复用接口/schedulings/getDutysByDate:'
+      operationId: getDutysByDate
+      parameters:
+        - name: searchDate
+          in: query
+          required: true
+          type: string
+          format: date
+          description: 日期，格式如“2018-12-11”
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                  $ref: '#/definitions/CalScheduling'
+  /appNg/getMonthSchedulingsForPerson:
+    get:
+      tags:
+        - '首页homePage'
+      summary: 按月份获取当前用户的值班信息，与接口/schedulings/getListSchedulings类似，但当前用户信息取自token
+      operationId: getMonthSchedulingsForPerson
+      parameters:
+        - name: searchMonth
+          in: query
+          required: true
+          type: string
+          description: 查询的月份，如“2018-09”
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/ListScheduling'
+  /appNg/noticeRecSearch:
+    post:
+      tags:
+        - 首页homePage
+      summary: '根据条件查询本单位接收的通知公告列表-分页，复用接口/notices/recSearch'
+      operationId: findRecNotices
+      parameters:
+        - name: noticesVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              noticeTypeId:
+                type: string
+              sendStartTime:
+                type: string
+                format: date-time
+              sendEndTime:
+                type: string
+                format: date-time
+              buildOrgIds:
+                type: array
+                description: 通知创建单位
+                items:
+                  type: string
+              revOrgId:
+                type: string
+                description: 接收单位ID，即当前用户所属单位ID
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/NoticeRecList'
+  /appNg/noticesSearch:
+    post:
+      tags:
+        - 首页homePage
+      summary: '根据条件查询通知公告列表-分页，复用/notices/search:'
+      operationId: findNotices
+      parameters:
+        - name: noticesVo
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              noticeTypeId:
+                type: string
+              sendStartTime:
+                type: string
+                format: date-time
+              sendEndTime:
+                type: string
+                format: date-time
+              sendStatus:
+                type: string
+              orgId:
+                type: string
+                description: 单位ID，即当前用户所属单位ID
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/NoticeList'
+  /appNg/viewNoticeRec/{noticeRecId}:
+    get:
+      tags:
+        - 首页homePage
+      summary: '接收的通知公告查看，复用接口/notices/viewNoticeRec/{noticeRecId}'
+      operationId: viewNoticeRec
+      parameters:
+        - name: noticeRecId
+          in: path
+          required: true
+          type: string
+          description: 通知公告接收ID
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: object
+                properties:
+                  noticeRec:
+                    $ref: '#/definitions/NoticeRec'
+                  docAtts:
+                    type: array
+                    items:
+                      $ref: '#/definitions/DocAttachment'
+
+  /appNg/viewNotices/{id}:
+    get:
+      tags:
+         - 首页homePage
+      summary: '获取单条通知公告信息，复用接口/notices/{id}'
+      operationId: findnoticeById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description: ok
+          schema:
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: object
+                properties:
+                  notice:
+                    $ref: '#/definitions/Notice'
+                  docAtts:
+                    type: array
+                    items:
+                      $ref: '#/definitions/DocAttachment'
+  ####事件上报####
+  /appNg/findInfoReports:
+    post:
+      tags:
+        - 事件上报infoReport
+      summary: '根据条件查询信息列表-分页，复用接口/infoMags/searchInfoByButton，后台根据token获取当前移动端用户信息，查询该用户通过APP上报的信息'
+      operationId: findInfoReports
+      parameters:
+        - name: infoReportVo
+          in: body
+          required: true
+          schema:
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/IMAcceptList'
+  /appNg/addInfo:
+    post:
+      tags:
+        - 事件上报infoReport
+      summary: '信息填报，包括暂存、应急指挥中心用户报给自己，后端需同时更新IM_ACCEPT_DEAL表，复用接口/infoMags/'
+      operationId: addInfo
+      parameters:
+        - name: imAcceptVo
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/IMAcceptVo'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /appNg/infoMags/{id}:
+     put:
+       tags:
+         - 事件上报infoReport
+       summary: '修改信息，复用接口infoMags/{id}'
+       operationId: updateInfo
+       parameters:
+         - $ref: '#/parameters/id-p'
+         - name: imAcceptVo
+           in: body
+           required: true
+           schema:
+             $ref: '#/definitions/IMAcceptVo'
+       responses:
+         200:
+           description: ok
+           schema:
+             $ref: '#/definitions/ReturnResult'
+     get:
+       tags:
+         - 事件上报infoReport
+       summary: '获取单条上报、接报信息'
+       operationId: findInfoReportById
+       parameters:
+         - $ref: '#/parameters/id-p'
+       responses:
+         200:
+           description: ok
+           schema:
+             type: object
+             allOf:
+               - $ref: '#/definitions/ReturnResult'
+             properties:
+               data:
+                 type: object
+                 properties:
+                   imAccept:
+                     type: object
+                     $ref: '#/definitions/IMAccept'
+                   pictures:
+                     type: array
+                     items:
+                       $ref: '#/definitions/DocAttachment'
+                   videos:
+                     type: array
+                     items:
+                       $ref: '#/definitions/DocAttachment'
+                   audios:
+                     type: array
+                     items:
+                       $ref: '#/definitions/DocAttachment'
+     delete:
+       tags:
+         - 事件上报infoReport
+       summary: '删除信息'
+       operationId: deleteInfo
+       parameters:
+         - $ref: '#/parameters/id-p'
+       responses:
+         200:
+           description: ok
+           schema:
+             $ref: '#/definitions/ReturnResult'
+  /appNg/saveAndSendInfo:
+    post:
+      tags:
+        - 事件上报infoReport
+      summary: '信息上报，为“保存”+“上报”接口'
+      operationId: saveAndSendInfo
+      parameters:
+        - name: sendFlag
+          in: query
+          required: true
+          type: string
+          description: 按钮含义：固定值上报为“1”
+        - name: imAcceptVo
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/IMAcceptVo'
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/ReturnResult'
+  /appNg/sendInfo:
+     post:
+       tags:
+         - 事件上报infoReport
+       summary: '发送信息，复用接口/infoMags/dealInfo'
+       operationId: sendInfo
+       parameters:
+         - name: buttonFlag
+           in: query
+           required: true
+           type: string
+           description: 按钮含义：发送1
+         - name: infoDispatch
+           in: body
+           required: true
+           schema:
+             $ref: '#/definitions/IMAcceptDeal'
+       responses:
+         200:
+           description: ok
+           schema:
+             $ref: '#/definitions/ReturnResult'
+  /appNg/findEventTypeList:
+    get:
+      tags:
+        - 事件上报infoReport
+      summary: 获取事件类型选择列表（获取所有叶子节点的事件类型）
+      operationId: findEventTypeList
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    typeName:
+                      type: string
+  /appNg/findEventGradeList:
+    get:
+      tags:
+        - 事件上报infoReport
+      summary: 获取事件等级选择列表，复用/dic/options
+      operationId: findEventGradeList
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    typeName:
+                      type: string
+
+  ####任务反馈####
+  /appNg/tasksSearch:
+    post:
+      tags:
+        - 任务管理taskManagement
+      summary: '根据条件查询任务列表-分页，复用接口/cmd/tasks/search:'
+      operationId: findTasks
+      parameters:
+        - name: taskVO
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              flag:
+                type: string
+                description: 任务分类标志位：固定值为“1”——接收任务列表 （通过EC_TASK_EXEORG里的任务接收单位org_id与当前登录用户所属部门匹配查询）
+                enum:
+                    - 0
+                    - 1
+            allOf:
+              - $ref: '#/definitions/SearchBody'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/EcTaskList'
+  /appNg/tasks/{id}:
+    get:
+      tags:
+        - 任务管理taskManagement
+      summary: '获取单条任务信息，复用接口/cmd/tasks/{id}:'
+      operationId: findTaskById
+      parameters:
+        - $ref: '#/parameters/id-p'
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/EcTask'
+  /appNg/taskFeedback:
+    post:
+      tags:
+        - 任务管理taskManagement
+      summary: '新增任务反馈信息（含附件），复用接口/cmd/taskfeedback:'
+      operationId: addEcTaskFeedback
+      parameters:
+        - name: ecTaskFeedback
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EcTaskFeedbackVo'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+    get:
+      tags:
+        - 任务管理taskManagement
+      summary: '根据任务ID获取该条任务所有反馈信息'
+      operationId: findTaskFeedbacksByTaskId
+      parameters:
+        - name: taskId
+          in: query
+          description: 任务ID
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                type: array
+                items:
+                    $ref: '#/definitions/EcTaskFeedbackAtt'
+  /appNg/taskFeedback/{id}:
+     get:
+       tags:
+         - 任务管理taskManagement
+       summary: 获取单条反馈信息
+       operationId: findTaskFeedbackById
+       parameters:
+         - $ref: '#/parameters/id-p'
+       responses:
+         200:
+           description:  OK
+           schema:
+             type: object
+             allOf:
+               - $ref: '#/definitions/ReturnResult'
+             properties:
+               data:
+                 type: object
+                 properties:
+                   ecTaskFeedback:
+                     $ref: '#/definitions/EcTaskFeedback'
+                   pictures:
+                     type: array
+                     items:
+                       $ref: '#/definitions/DocAttachment'
+                   videos:
+                     type: array
+                     items:
+                       $ref: '#/definitions/DocAttachment'
+                   audios:
+                     type: array
+                     items:
+                       $ref: '#/definitions/DocAttachment'
+ ####个人信息####
+  /appNg/getUser:
+    get:
+      tags:
+        - 个人信息personalInfo
+      summary: 获取当前登录的单个用户信息，后台从token中获取用户id，复用接口/users/{id}
+      operationId: findUser
+      responses:
+        200:
+          description:  OK
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/definitions/ReturnResult'
+            properties:
+              data:
+                $ref: '#/definitions/User'
+################ definitions#################
+definitions:
+  CalScheduling:
+    type: object
+    properties:
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      day:
+        type: string
+        description: 日历左上角显示的天，即本月的第几天,列表显示
+      weekDay:
+        type: string
+        description: 星期几，即该天是周几，如“星期三”
+      schedulingsForDay:
+        description: 按天排班的返回，ptypeCode等于1
+        type: array
+        items:
+          $ref: '#/definitions/SchedulingDayForShow'
+      schedulingsForTime:
+        description: 按次排班的返回,ptypeCode等于0
+        type: array
+        items:
+          $ref: '#/definitions/SchedulingTimeForShow'
+  SchedulingDayForShow:
+    type: object
+    properties:
+      id:
+        type: string
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”， 列表显示
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      dutyTeamId:
+        type: string
+        description: 值班分组ID（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      dutyTeamName:
+        type: string
+        description: 值班分组名称， 列表显示
+      orderTeam:
+        type: integer
+        description: 分组排序
+      ptypeCode:
+        type: string
+        description: 值班分组的值班类型编码（0：按班次值班，1：按天值班）-（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      personInfo:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: 值班人员ID
+            addrName:
+              type: string
+              description: 值班人员姓名
+      startTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 8:30”， 列表显示
+      endTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 17:30”， 列表显示
+  SchedulingTimeForShow:
+    type: object
+    properties:
+      shiftPatternId:
+        type: string
+        description: 班次ID（来自表ED_SHIFT_PATTERN）， 列表显示
+      shiftPatternName:
+        type: string
+        description: 班次名称，列表显示
+      shiftSeq:
+        type: string
+        description: 班次排序
+      startTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 8:30”， 列表显示
+      endTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 17:30”， 列表显示
+      schedulingDetail:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            dutyDate:
+              type: string
+              format: date
+              description: 年-月-日，如“2018-09-28”， 列表显示
+            dateTypeCode:
+              type: integer
+              description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+            dateTypeName:
+              type: string
+              description: 日期类型名称
+            holidayName:
+              type: string
+              description: 节假日名称，如中秋节等，列表显示
+            dutyTeamId:
+              type: string
+              description: 值班分组ID（来自表ED_PERSON_TYPE_PATTERN），列表显示
+            dutyTeamName:
+              type: string
+              description: 值班分组名称， 列表显示
+            orderTeam:
+              type: integer
+              description: 分组排序
+            ptypeCode:
+              type: string
+              description: 值班分组的值班类型编码（0：按班次值班，1：按天值班）-（来自表ED_PERSON_TYPE_PATTERN），列表显示
+            personInfo:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: 值班人员ID
+                  addrName:
+                    type: string
+                    description: 值班人员姓名
+            startTime:
+              type: string
+              format: date-time
+              description: 年-月-日 小时：分，如“2018-09-28 8:30”， 列表显示
+            endTime:
+              type: string
+              format: date-time
+              description: 年-月-日 小时：分，如“2018-09-28 17:30”， 列表显示
+#  PersonSearchVO:
+#    type: object
+#    properties:
+#      orgId:
+#        type: string
+#        description: 所属单位ID
+#      month:
+#        type: string
+#        description: 查询的月份，如“2018-09”
+#      personIds:
+#        type: array
+#        description: 值班人员的IDs
+#        items:
+#          type: string
+  ListScheduling:
+    type: object
+    properties:
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      day:
+        type: string
+        description: 日历左上角显示的天，即本月的第几天,列表显示
+      weekDay:
+        type: string
+        description: 星期几，即该天是周几，如“星期三”
+      schedulings:
+        description: 按天排班的返回，ptypeCode等于1
+        type: array
+        items:
+          $ref: '#/definitions/Scheduling'
+  Scheduling:
+    type: object
+    properties:
+      id:
+        type: string
+      dutyDate:
+        type: string
+        format: date
+        description: 年-月-日，如“2018-09-28”， 列表显示
+      dateTypeCode:
+        type: integer
+        description: 日期类型（1：工作日；2：双休日，3：法定节假日，4：特殊节假日，5：其它）， 列表显示
+      dateTypeName:
+        type: string
+        description: 日期类型名称
+      holidayName:
+        type: string
+        description: 节假日名称，如中秋节等，列表显示
+      shiftPatternId:
+        type: string
+        description: 班次ID（来自表ED_SHIFT_PATTERN）， 列表显示
+      shiftPatternName:
+        type: string
+        description: 班次名称，列表显示
+      dutyTeamId:
+        type: string
+        description: 值班分组ID（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      dutyTeamName:
+        type: string
+        description: 值班分组名称， 列表显示
+      orderTeam:
+        type: integer
+        description: 分组排序
+      ptypeCode:
+        type: string
+        description: 值班分组的值班类型编码（0：按班次值班，1：按天值班）-（来自表ED_PERSON_TYPE_PATTERN），列表显示
+      personInfo:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: 值班人员ID
+            addrName:
+              type: string
+              description: 值班人员姓名
+      startTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 8:30”， 列表显示
+      endTime:
+        type: string
+        format: date-time
+        description: 年-月-日 小时：分，如“2018-09-28 17:30”， 列表显示
+  NoticeRecList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/NoticeRec'
+  NoticeRec:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      noticeId:
+        type: string
+      title:
+        type: string
+        description: 列表显示
+      noticeTypeId:
+        type: string
+      noticeTypeName:
+        type: string
+        description: 列表显示
+      content:
+        type: string
+      buildOrgId:
+        type: string
+      buildOrgName:
+        type: string
+        description: 列表显示
+      sendBy:
+        type: string
+        description: 发送人，列表显示
+      receiveOrgId:
+        type: string
+      isFeedback:
+        type: string
+        description: 列表显示，0未反馈，1已反馈
+      sendTime:
+        type: string
+        description: 列表显示
+  NoticeList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/Notice'
+  Notice:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 列表显示
+      title:
+        type: string
+        description: 列表显示
+      noticeTypeId:
+        type: string
+      noticeTypeName:
+        type: string
+        description: 列表显示
+      content:
+        type: string
+      buildOrgId:
+        type: string
+      buildOrgName:
+        type: string
+        description: 列表显示
+      createBy:
+        type: string
+        description: 创建人
+      createTime:
+        type: string
+        format: date-time
+      sendStatus:
+        type: string
+        description: 列表显示，0未发送，1已发送
+      sendTime:
+        type: string
+        description: 列表显示
+      notes:
+        type: string
+  IMAcceptList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        properties:
+          totalElements:
+            type: integer
+            description: 记录总数
+          totalPages:
+            type: integer
+            description: 总页数
+          first:
+            type: boolean
+            description: 是否第一页
+          last:
+            type: boolean
+            description: 是否最后一页
+          number:
+            type: integer
+            description: 当前页数，页码从0开始
+          size:
+            type: integer
+            description: 每页记录数
+          sort:
+            type: string
+          numberOfElements:
+            type: integer
+            description: 返回记录条数
+          content:
+            type: array
+            items:
+              $ref: '#/definitions/IMAcceptAll'
+  IMAcceptAll:
+    type: object
+    properties:
+      id:
+        type: string
+      imAccept:
+        $ref: '#/definitions/IMAccept'
+        description: 接报信息详情
+      createOrgId:
+        type: string
+        description: 创建单位ID
+      createOrgName:
+        type: string
+      dealOrgId:
+        type: string
+      dealOrgName:
+        type: string
+      dealFlag:
+        type: string
+        description: 列表显示，接收后处理状态：0未发送，1已发送，2已退回，3已办结，4已生成事件
+        enum:
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+      dealTime:
+        type: string
+        format: 'date-time'
+      returnReason:
+        type: string
+      eventId:
+        type: string
+      dealPersonId:
+        type: string
+      dealPersonName:
+        type: string
+  IMAccept:
+    type: object
+    properties:
+      id:
+        type: string
+      eventName:
+        type: string
+        description: 列表显示，移动端参数
+      position:
+        type: string
+        description: 移动端参数
+      lonAndLat:
+        type: string
+        description: 移动端参数
+      occurTime:
+        type: string
+        description: 列表显示,移动端参数
+      eventTypeId:
+        type: string
+        description: 移动端参数
+      eventTypeName:
+        type: string
+        description: 列表显示，移动端参数
+      eventGradeId:
+        type: string
+        description: 移动端参数
+      eventGradeName:
+        type: string
+        description: 列表显示，移动端参数
+      reportOrgId:
+        type: string
+      reportOrgName:
+        type: string
+      reporter:
+        type: string
+      reporterTel:
+        type: string
+      methodId:
+        type: string
+        description: 移动端参数，固定值为“06”
+      methodName:
+        type: string
+      reportTime:
+        type: string
+        format: date-time
+      eventCause:
+        type: string
+      eventDesc:
+        type: string
+        description: 移动端参数
+      protreatment:
+        type: string
+      deathNum:
+        type: integer
+      wondedNum:
+        type: integer
+      request:
+        type: string
+      isFirst:
+        type: string
+        description: 移动端参数，是否初报，固定值为“0”，初报
+      firstReportId:
+        type: string
+        description: 首报Id
+      createOrgId:
+        type: string
+        description: 创建单位ID
+  IMAcceptVo:
+    type: object
+    properties:
+      imAccept:
+        $ref: '#/definitions/IMAccept'
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 接报信息相关附件ID
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+  IMAcceptDeal:
+    type: object
+    properties:
+      id:
+        type: string
+      acceptId:
+        type: string
+        description: 接报信息ID
+      createOrgId:
+        type: string
+        description: 创建单位ID，后端token获取当前用户所属单位ID
+      createOrgName:
+        type: string
+        description: 后端token获取当前用户所属单位
+      dealOrgId:
+        type: string
+        description: 移动端-前端默认为“应急指挥中心的ID”
+      dealOrgName:
+        type: string
+      dealFlag:
+        type: string
+        description: 接收后处理状态：0未发送，1已发送，2已退回，3已办结，4已生成事件
+        enum:
+           - 0
+           - 1
+           - 2
+           - 3
+           - 4
+      dealTime:
+        type: string
+        format: 'date-time'
+      returnReason:
+        type: string
+      eventId:
+        type: string
+      dealPersonId:
+        type: string
+      dealPersonName:
+        type: string
+  EcTaskList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+       data:
+         type: object
+         properties:
+           totalElements:
+             type: integer
+             description: 记录总数
+           totalPages:
+             type: integer
+             description: 总页数
+           first:
+             type: boolean
+             description: 是否第一页
+           last:
+             type: boolean
+             description: 是否最后一页
+           number:
+             type: integer
+             description: 当前页数，页码从0开始
+           size:
+             type: integer
+             description: 每页记录数
+           sort:
+             type: string
+           numberOfElements:
+             type: integer
+             description: 返回记录条数
+           content:
+             type: array
+             items:
+                $ref: '#/definitions/EcTask'
+  EcTask:
+    type: object
+    properties:
+      id:
+        type: string
+      schemeId:
+        type: string
+      schemeName:
+        type: string
+      eventId:
+        type: string
+      eventName:
+        type: string
+        description: 事件名称，列表显示
+      planTaskId:
+        type: string
+      name:
+        type: string
+        description: 任务标题，列表显示
+      content:
+        type: string
+      startTime:
+        type: string
+        format: date-time
+      endTime:
+        type: string
+        format: date-time
+      taskStatus:
+        type: string
+        description: 任务状态 0未下发，1已下发，2已完成 列表显示
+        enum:
+          - 0
+          - 1
+          - 2
+      createTime:
+        type: string
+        format: date-time
+        description: 创建时间 列表显示
+      createOrgName:
+        type: string
+        description: 创建单位名称 列表显示
+      taskExeorg:
+        $ref: '#/definitions/EcTaskExeorg'
+  EcTaskExeorg:
+    type: object
+    properties:
+      id:
+        type: string
+      taskId:
+        type: string
+      orgId:
+        type: string
+      orgName:
+        type: string
+        description: 负责单位，列表显示
+      sendTime:
+        type: string
+        format: date-time
+      principal:
+        type: string
+      principalTel:
+        type: string
+  EcTaskFeedbackVo:
+    type: object
+    properties:
+      ecTaskFeedback:
+        $ref: '#/definitions/EcTaskFeedback'
+      fileIds:
+        type: array
+        items:
+          type: string
+          description: 任务反馈相关附件ID数组
+      fileDeleteIds:
+        type: array
+        items:
+          type: string
+          description: 删除的附件ID数组
+  EcTaskFeedback:
+    type: object
+    properties:
+      id:
+        type: string
+      taskId:
+        type: string
+      taskOrgId:
+        type: string
+      content:
+        type: string
+      feedbackBy:
+         type: string
+      feedbackTime:
+         type: string
+         format: date-time
+      completeStatus:
+        type: string
+        description: 是否完成：0否 1是
+        enum:
+          - 0
+          - 1
+      isHaveFiles:
+        type: string
+        description: 是否有附件：0否 1是 只适用于判断有无附件，是否显示下载功能
+        enum:
+          - 0
+          - 1
+      feedbackType:
+        type: string
+        description: 反馈类型：0反馈，1督办，由后台来传
+  EcTaskFeedbackAtt:
+    type: object
+    properties:
+      ecTaskFeedback:
+          $ref: '#/definitions/EcTaskFeedback'
+      docAtts:
+        type: array
+        items:
+          $ref: '#/definitions/DocAttachment'
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+      account:
+        type: string
+      status:
+        type: string
+        description: 禁用标识，1:启用，0：禁用
+      createTime:
+        type: string
+        format: dateTime
+      profile:
+        $ref: '#/definitions/Profile'
+  Profile:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      avatar:
+        type: string
+      email:
+        type: string
+      mobile:
+        type: string
+      sex:
+        type: string
+        description: 0:女，1：男
+        enum:
+          - 0
+          - 1
+      position:
+        type: string
+      orgId:
+        type: string
+      orgName:
+        type: string
+  DocAttachment:
+    type: object
+    properties:
+      id:
+        type: string
+        description: 主键
+      fileName:
+        type: string
+        description: 文件名称
+      location:
+        type: string
+        description: 相对路径
+      fileType:
+        type: string
+        description: 文件类型
+##### common model####
+  SearchBody:
+    type: object
+    properties:
+      page:
+        type: integer
+      size:
+        type: integer
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+############################ parameters#####################
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string

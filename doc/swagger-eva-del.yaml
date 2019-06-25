@@ -1,0 +1,751 @@
+swagger: '2.0'
+info:
+  description: >-
+    应急过程再现、处置评估（包括事件评估、应急能力评估）、评估指标管理等.
+  version: 1.0.0
+  title: eva总结评估
+host: 127.0.0.1:8000
+basePath: /eva/v1
+tags:
+  - name: 过程再现
+    description: 从事件发生接报到事件处置结束全过程的记录,包括文本、图片、音视频文件等。
+  - name: 事件评估
+    description: 对事件应急处置全过程进行评估，并生成事件评估报告。
+  - name: 能力评估
+    description: 根据应急队伍、应急物资、应急装备和应急技术进行综合评估，并生成应急能力评估报告。
+  - name: 评估指标管理
+    description: 包括事件评估指标管理、能力评估模型管理。
+schemes:
+  - http
+paths:
+#### process 过程再现####
+ /process:
+    post:
+      tags:
+        - 过程再现
+      summary: '新增过程记录（含附件）'
+      operationId: addProcess
+      parameters:
+        - name: process
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ProcessVo'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /process/{id}:
+    get:
+        tags:
+          - 过程再现
+        summary: 获取单条过程记录信息(含附件)
+        operationId: findProcessById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/ProcessVo'
+    put:
+        tags:
+          - 过程再现
+        summary: '修改过程记录信息(手动创建的，含附件)'
+        operationId: updateProcess
+        parameters:
+          - $ref: '#/parameters/id-p'
+          - name: process
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/ProcessVo'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+    delete:
+        tags:
+          - 过程再现
+        summary: '删除过程记录(手动创建的)'
+        operationId: deleteProcess
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+ /process/searchAll:
+    post:
+        tags:
+          - 过程再现
+        summary: '根据条件查询过程再现记录列表-不分页'
+        operationId: findProcessesAll
+        parameters:
+          - name: processVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                eventId:
+                  type: string
+                  description: 事件ID
+        responses:
+          200:
+            description: OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/Process'
+# /process/searchAll:
+#     get:
+#         tags:
+#             - 过程再现
+#         summary: '根据事件ID获取事件的所有过程再现记录信息'
+#         operationId: findProcessByEventId
+#         parameters:
+#           - name: eventId
+#             in: query
+#             description: 事件ID
+#             type: string
+#         responses:
+#           200:
+#             description: OK
+#             schema:
+#                 type: object
+#                 allOf:
+#                   - $ref: '#/definitions/ReturnResult'
+#                 properties:
+#                   data:
+#                     type: array
+#                     items:
+#                       $ref: '#/definitions/Process'
+
+ #### event eva 事件评估####
+ /eventEva:
+    post:
+      tags:
+        - 事件评估
+      summary: '新增事件评估报告，并更新事件综合评估状态'
+      operationId: addEventEvaReport
+      parameters:
+        - name: eventEvaReport
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EventEvaReport'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /eventEva/{id}:
+    get:
+        tags:
+          - 事件评估
+        summary: 获取单条事件评估报告信息（含各评估细项分数）
+        operationId: findEventEvaReportById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/EventEvaReport'
+    put:
+        tags:
+          - 事件评估
+        summary: '修改事件评估报告信息（含各评估细项分数）'
+        operationId: updateEventEvaReport
+        parameters:
+          - $ref: '#/parameters/id-p'
+          - name: eventEvaReport
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/EventEvaReport'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+ /eventEva/searchAll:
+    post:
+        tags:
+          - 事件评估
+        summary: '根据条件查询事件评估报告列表-不分页'
+        operationId: findEventEvaRpsAll
+        parameters:
+          - name: eventEvaVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                eventId:
+                  type: string
+                  description: 事件ID
+        responses:
+          200:
+            description: OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/EventEvaReport'
+# /eventEva/search:
+#     get:
+#         tags:
+#             - 事件评估
+#         summary: '根据事件ID获取事件的事件评估报告信息'
+#         operationId: findEventEvaRpByEId
+#         parameters:
+#           - name: eventId
+#             in: query
+#             description: 事件ID
+#             type: string
+#         responses:
+#           200:
+#             description: OK
+#             schema:
+#                 type: object
+#                 allOf:
+#                   - $ref: '#/definitions/ReturnResult'
+#                 properties:
+#                   data:
+#                     type: array
+#                     items:
+#                       $ref: '#/definitions/EventEvaReport'
+
+ /eventEva/items:
+    get:
+      tags:
+        - 评估指标管理
+      summary: 根据事件类型获取事件评估项列表
+      operationId: findEItemsList
+      parameters:
+        - name: eventId
+          in: query
+          description: 事件ID
+          type: string
+      responses:
+        200:
+          description:  OK
+          schema:
+            $ref: '#/definitions/EventEvaItemList'
+    post:
+      tags:
+        - 评估指标管理
+      summary: '新增事件评估项'
+      operationId: addEventEvaItem
+      parameters:
+        - name: eventEvaItem
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/EventEvaItem'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /eventEva/items/{id}:
+    get:
+        tags:
+          - 评估指标管理
+        summary: 获取单条事件评估项信息
+        operationId: findEventEvaItemById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/EventEvaItem'
+    put:
+        tags:
+          - 评估指标管理
+        summary: '修改事件评估项信息'
+        operationId: updateEventEvaItem
+        parameters:
+          - $ref: '#/parameters/id-p'
+          - name: eventEvaItem
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/EventEvaItem'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+
+    delete:
+        tags:
+          - 评估指标管理
+        summary: '删除事件评估项信息'
+        operationId: deleteEventEvaItem
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+
+ #### ability eva 能力评估####
+ /abilityEva:
+    post:
+      tags:
+        - 能力评估
+      summary: '新增能力评估报告，并更新事件综合评估状态'
+      operationId: addAbilityEvaReport
+      parameters:
+        - name: abilityEvaReport
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AbilityEvaReport'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /abilityEva/{id}:
+    get:
+        tags:
+          - 能力评估
+        summary: 获取单条能力评估报告信息（含各评估细项分数）
+        operationId: findAbilityEvaReportById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/AbilityEvaReport'
+    put:
+        tags:
+          - 能力评估
+        summary: '修改能力评估报告信息（含各评估细项分数）'
+        operationId: updateAbilityEvaReport
+        parameters:
+          - $ref: '#/parameters/id-p'
+          - name: abilityEvaReport
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/AbilityEvaReport'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+ /abilityEva/searchAll:
+    post:
+        tags:
+          - 能力评估
+        summary: '根据条件查询能力评估报告列表-不分页'
+        operationId: findAbilityEvaRpsAll
+        parameters:
+          - name: abilityEvaVO
+            in: body
+            required: true
+            schema:
+              type: object
+              properties:
+                eventId:
+                  type: string
+                  description: 事件ID
+        responses:
+          200:
+            description: OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/definitions/AbilityEvaReport'
+# /abilityEva/search:
+#     get:
+#         tags:
+#             - 能力评估
+#         summary: '根据事件ID获取事件的能力评估报告信息'
+#         operationId: findAbilityEvaRpByEId
+#         parameters:
+#           - name: eventId
+#             in: query
+#             description: 事件ID
+#             type: string
+#         responses:
+#           200:
+#             description: OK
+#             schema:
+#                 type: object
+#                 allOf:
+#                   - $ref: '#/definitions/ReturnResult'
+#                 properties:
+#                   data:
+#                     type: array
+#                     items:
+#                       $ref: '#/definitions/AbilityEvaReport'
+ /abilityEva/items:
+    get:
+      tags:
+        - 评估指标管理
+      summary: 根据能力评估类型获取能力评估项列表
+      operationId: findAItemsList
+      parameters:
+        - name: itemTypeId
+          in: query
+          description: 能力评估类型ID
+          type: string
+      responses:
+        200:
+          description:  OK
+          schema:
+            $ref: '#/definitions/AbilityEvaItemList'
+    post:
+      tags:
+        - 评估指标管理
+      summary: '新增能力评估项'
+      operationId: addAbilityEvaItem
+      parameters:
+        - name: abilityEvaItem
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AbilityEvaItem'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReturnResult'
+ /abilityEva/items/{id}:
+    get:
+        tags:
+          - 评估指标管理
+        summary: 获取单条能力评估项信息
+        operationId: findAbilityEvaItemById
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description:  OK
+            schema:
+              type: object
+              allOf:
+                - $ref: '#/definitions/ReturnResult'
+              properties:
+                data:
+                  $ref: '#/definitions/AbilityEvaItem'
+    put:
+        tags:
+          - 评估指标管理
+        summary: '修改能力评估项信息'
+        operationId: updateAbilityEvaItem
+        parameters:
+          - $ref: '#/parameters/id-p'
+          - name: abilityEvaItem
+            in: body
+            required: true
+            schema:
+              $ref: '#/definitions/AbilityEvaItem'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+
+    delete:
+        tags:
+          - 评估指标管理
+        summary: '删除能力评估项信息'
+        operationId: deleteAbilityEvaItem
+        parameters:
+          - $ref: '#/parameters/id-p'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/ReturnResult'
+
+################ definitions#################
+definitions:
+#### process ####
+  Process:
+    type: object
+    properties:
+      id:
+        type: string
+      eventId:
+        type: string
+      eventName:
+        type: string
+      operation:
+        type: string
+      operator:
+        type: string
+      operationTime:
+        type: string
+        format: date-time
+      firstNCode:
+        type: string
+      firstNName:
+        type: string
+      secondNCode:
+        type: string
+      secondNName:
+        type: string
+      processType:
+        type: string
+        description: 0系统自动创建 1人工手动创建
+        enum:
+             - 0
+             - 1
+  ProcessVo:
+      type: object
+      properties:
+         process:
+            $ref: '#/definitions/Process'
+         fileIds:
+            type: array
+            items:
+              type: string
+              description: 过程记录相关附件ID数组
+#### event eva ####
+  EventEvaReport:
+    type: object
+    properties:
+      id:
+        type: string
+      eventId:
+        type: string
+      name:
+        type: string
+      overallEva:
+        type: string
+      evaluator:
+        type: string
+      evaluateUnit:
+        type: string
+      evaluateTime:
+        type: string
+        format: date-time
+      totalScore:
+        type: number
+        format: double
+      resultGrade:
+        type: string
+      advice:
+        type: string
+      notes:
+        type: string
+      evaScore:
+        $ref: '#/definitions/EventEvaScore'
+
+  EventEvaScore:
+    type: object
+    properties:
+      id:
+        type: string
+      reportId:
+        type: string
+      eventEvaItem:
+        type: array
+        items:
+            $ref: '#/definitions/EventEvaItem'
+      score:
+        type: number
+        format: double
+      target:
+        type: number
+        format: double
+
+  EventEvaItem:
+    type: object
+    properties:
+      id:
+        type: string
+      orgId:
+        type: string
+      eventTypeId:
+        type: string
+      eventTypeName:
+        type: string
+      name:
+        type: string
+      interpert:
+        type: string
+      proportion:
+        type: number
+        format: double
+
+  EventEvaItemList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        allOf:
+          - $ref: '#/definitions/EventEvaItem'
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/EventEvaItem'
+
+#### ability eva ####
+  AbilityEvaReport:
+    type: object
+    properties:
+      id:
+        type: string
+      eventId:
+        type: string
+      name:
+        type: string
+      overallEva:
+        type: string
+      evaluator:
+        type: string
+      evaluateUnit:
+        type: string
+      evaluateTime:
+        type: string
+        format: date-time
+      totalScore:
+        type: number
+        format: double
+      resultGrade:
+        type: string
+      advice:
+        type: string
+      notes:
+        type: string
+      evaScore:
+        $ref: '#/definitions/AbilityEvaScore'
+
+  AbilityEvaScore:
+    type: object
+    properties:
+      id:
+        type: string
+      reportId:
+        type: string
+      aEvaItem:
+        type: array
+        items:
+            $ref: '#/definitions/AbilityEvaItem'
+      score:
+        type: number
+        format: double
+      target:
+        type: number
+        format: double
+
+  AbilityItemType:
+    type: object
+    properties:
+      id:
+        type: string
+      orgId:
+        type: string
+      name:
+        type: string
+
+  AbilityEvaItem:
+    type: object
+    properties:
+      id:
+        type: string
+      orgId:
+        type: string
+      aItemType:
+        $ref: '#/definitions/AbilityItemType'
+      name:
+        type: string
+      interpert:
+        type: string
+      proportion:
+        type: number
+        format: double
+
+  AbilityEvaItemList:
+    type: object
+    allOf:
+      - $ref: '#/definitions/ReturnResult'
+    properties:
+      data:
+        type: object
+        allOf:
+          - $ref: '#/definitions/AbilityEvaItem'
+        properties:
+          children:
+            type: array
+            items:
+              $ref: '#/definitions/AbilityEvaItem'
+
+##### common model####
+  ReturnResult:
+    type: object
+    properties:
+      code:
+        type: integer
+        description: >-
+          2000  操作成功
+          4000 操作失败
+          4001 验证码出错
+          4002 用户名或密码错误
+          5000 后台逻辑错误
+          5001 令牌失效或过期
+          5009 未知错误
+      msg:
+        type: string
+
+
+############################ parameters#####################
+parameters:
+  id-p:
+    name: id
+    in: path
+    required: true
+    description: 主键ID
+    type: string
