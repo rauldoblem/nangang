@@ -1,8 +1,8 @@
 package com.taiji.emp.base.service;
 
-import com.taiji.emp.base.entity.SmsRecieve;
-import com.taiji.emp.base.repository.SmsRecieveRepository;
-import com.taiji.emp.base.vo.SmsRecieveVo;
+import com.taiji.emp.base.entity.SmsReceive;
+import com.taiji.emp.base.repository.SmsReceiveRepository;
+import com.taiji.emp.base.vo.SmsReceiveVo;
 import com.taiji.micro.common.enums.DelFlagEnum;
 import com.taiji.micro.common.service.BaseService;
 import lombok.AllArgsConstructor;
@@ -16,38 +16,38 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class SmsRecieveService extends BaseService<SmsRecieve,String> {
+public class SmsReceiveService extends BaseService<SmsReceive,String> {
     @Autowired
-    private SmsRecieveRepository smsRecieveRepository;
+    private SmsReceiveRepository smsReceiveRepository;
 
-    public SmsRecieve create(SmsRecieve entity){
+    public SmsReceive create(SmsReceive entity){
         Assert.notNull(entity,"Sms 对象不能为null");
-        SmsRecieve result = smsRecieveRepository.save(entity);
+        SmsReceive result = smsReceiveRepository.save(entity);
         return result;
     }
 
-    public SmsRecieve findOne(String id){
+    public SmsReceive findOne(String id){
         Assert.hasText(id,"id不能为null或空字符串");
-        SmsRecieve result = smsRecieveRepository.findOne(id);
+        SmsReceive result = smsReceiveRepository.findOne(id);
         return result;
     }
 
-    public SmsRecieve update(SmsRecieve entity){
+    public SmsReceive update(SmsReceive entity){
         Assert.notNull(entity,"Sms对象不能为Null");
-        SmsRecieve result = smsRecieveRepository.save(entity);
+        SmsReceive result = smsReceiveRepository.save(entity);
         return result;
     }
 
     public void deleteLogic(String id){
         Assert.hasText(id,"id不能为Null或空字符串");
-        SmsRecieveVo vo = new SmsRecieveVo();
+        SmsReceiveVo vo = new SmsReceiveVo();
         vo.setSmsId(id);
-        List<SmsRecieve> result = smsRecieveRepository.findList(vo);
-        smsRecieveRepository.delete(result);
+        List<SmsReceive> result = smsReceiveRepository.findList(vo);
+        smsReceiveRepository.delete(result);
     }
 
-    public List<SmsRecieve> findList(SmsRecieveVo smsRecieveVo){
-        List<SmsRecieve> result = smsRecieveRepository.findList(smsRecieveVo);
+    public List<SmsReceive> findList(SmsReceiveVo smsReceiveVo){
+        List<SmsReceive> result = smsReceiveRepository.findList(smsReceiveVo);
         return result;
     }
 }
